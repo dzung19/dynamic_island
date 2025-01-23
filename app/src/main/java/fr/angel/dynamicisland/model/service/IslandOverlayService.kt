@@ -140,7 +140,8 @@ class IslandOverlayService : AccessibilityService() {
 		invertedTheme = settingsPreferences.getBoolean(THEME_INVERTED, false)
 	}
 
-	@SuppressLint("ClickableViewAccessibility")
+	@RequiresApi(Build.VERSION_CODES.S)
+    @SuppressLint("ClickableViewAccessibility")
 	private fun showOverlay(
 		windowManager: WindowManager,
 		params: WindowManager.LayoutParams
@@ -157,7 +158,6 @@ class IslandOverlayService : AccessibilityService() {
 				} else {
 					IslandViewState.Closed
 				}
-				Log.d("OverlayService", "Plugins changed: $bindedPlugins")
 			}
 
 			IslandApp(
@@ -222,7 +222,8 @@ class IslandOverlayService : AccessibilityService() {
 			Log.d("OverlayService", "Plugin with id ${plugin.id} added at the end")
 		}
 	}
-	fun removePlugin(plugin: BasePlugin) {
+	@RequiresApi(Build.VERSION_CODES.N)
+    fun removePlugin(plugin: BasePlugin) {
 		Log.d("OverlayService", "Plugin with id ${plugin.id} removed")
 		bindedPlugins.removeIf { it.id == plugin.id }
 	}

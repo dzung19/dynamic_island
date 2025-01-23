@@ -38,7 +38,10 @@ fun BehaviorSettingsScreen() {
             Spacer(modifier = Modifier.height(16.dp))
             SettingsSlider(
                 onValueChange = {
-                    IslandSettings.instance.autoHideOpenedAfter = it * 1000
+                    if (it.isNaN())
+                        IslandSettings.instance.autoHideOpenedAfter = 1000f
+                    else
+                        IslandSettings.instance.autoHideOpenedAfter = it * 1000
                 },
                 onReset = {
                     IslandSettings.instance.autoHideOpenedAfter = 5000f

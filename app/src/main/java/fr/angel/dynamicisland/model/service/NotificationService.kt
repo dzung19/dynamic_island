@@ -110,7 +110,8 @@ class NotificationService : NotificationListenerService() {
 		})
 	}
 
-	override fun onNotificationRemoved(statusBarNotification: StatusBarNotification) {
+	@RequiresApi(Build.VERSION_CODES.N)
+    override fun onNotificationRemoved(statusBarNotification: StatusBarNotification) {
 
 		// Remove notification from list
 		notifications.removeIf { it.id == statusBarNotification.id }

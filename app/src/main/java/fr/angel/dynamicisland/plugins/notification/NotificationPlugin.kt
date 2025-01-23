@@ -1,5 +1,6 @@
 package fr.angel.dynamicisland.plugins.notification
 
+import android.annotation.SuppressLint
 import android.app.RemoteInput
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -75,7 +76,8 @@ class NotificationPlugin(
 	private val handler = Handler(Looper.getMainLooper())
 
 	private val mBroadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
-		override fun onReceive(context: Context, intent: Intent) {
+		@SuppressLint("NewApi")
+        override fun onReceive(context: Context, intent: Intent) {
 
 			val extras : Bundle = intent.extras ?: return
 
@@ -120,7 +122,8 @@ class NotificationPlugin(
 		}
 	}
 
-	private fun removeNotificationAndUpdateState(id: Int) {
+	@SuppressLint("NewApi")
+    private fun removeNotificationAndUpdateState(id: Int) {
 
 		// Remove notification from list
 		notificationService?.notifications?.removeAll { it.id == id }
@@ -356,14 +359,12 @@ class NotificationPlugin(
 										.displayCutoutPadding(),
 									shape = CircleShape,
 									singleLine = true,
-									colors = with(TextFieldDefaults) {
-										textFieldColors(
-																		focusedIndicatorColor = Color.Transparent,
-																		unfocusedIndicatorColor = Color.Transparent,
-																		disabledIndicatorColor = Color.Transparent,
-																		errorIndicatorColor = Color.Transparent,
-																	)
-									},
+									colors = textFieldColors(
+                                                                    focusedIndicatorColor = Color.Transparent,
+                                                                    unfocusedIndicatorColor = Color.Transparent,
+                                                                    disabledIndicatorColor = Color.Transparent,
+                                                                    errorIndicatorColor = Color.Transparent,
+                                                                ),
 								)
 								IconButton(onClick = {
 									// Send reply action
@@ -448,7 +449,8 @@ class NotificationPlugin(
 		}
 	}
 
-	override fun onLeftSwipe() {
+	@SuppressLint("NewApi")
+    override fun onLeftSwipe() {
 		Log.d("Notification", "Left swipe")
 		context.sendBroadcast(Intent(ACTION_CLOSE))
 		context.removePlugin(this)

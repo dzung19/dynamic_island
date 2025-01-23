@@ -1,13 +1,17 @@
 package fr.angel.dynamicisland.plugins.media
 
+import android.annotation.SuppressLint
+import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.media.MediaMetadata
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
 import android.media.session.MediaSessionManager.OnActiveSessionsChangedListener
+import android.os.Build
 import android.provider.Settings
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
@@ -69,6 +73,7 @@ class MediaSessionPlugin(
             }
         }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     fun removeMedia(mediaController: MediaController) {
         callbackMap.remove(mediaController.packageName)
         if (callbackMap.isEmpty()) {
@@ -180,7 +185,7 @@ class MediaSessionPlugin(
 
             // Slider controlling the position in the song
             Slider(
-                value = if (isDragging) draggedPosition else animateFloatAsState(targetValue = songPosition).value,
+                value = if (isDragging) draggedPosition else animateFloatAsState(targetValue = if(songPosition.isNaN()) 0f else songPosition).value,
                 onValueChange = { value ->
                     Log.d("MediaSessionPlugin", "onValueChange: $value")
                     draggedPosition = value
@@ -190,7 +195,7 @@ class MediaSessionPlugin(
                     Log.d("MediaSessionPlugin", "onValueChangeFinished: $draggedPosition")
                     controls.seekTo(((draggedPosition / 100) * duration).toLong())
                     isDragging = false
-                    draggedOffset = songPosition - draggedPosition
+                    draggedOffset = if(songPosition.isNaN()) 0f else songPosition - draggedPosition
                 },
                 valueRange = 0f..100f,
             )
@@ -230,6 +235,7 @@ class MediaSessionPlugin(
         }
     }
 
+    @SuppressLint("NewApi")
     override fun onClick() {
         val current = callbackMap.values.firstOrNull() ?: return
 
@@ -237,7 +243,19 @@ class MediaSessionPlugin(
 
         Log.d("MediaSessionPlugin", "onClick: ${controller.sessionActivity}")
         if (controller.sessionActivity != null) {
-            controller.sessionActivity!!.send(0)
+            try {
+                // Ensure the PendingIntent is not canceled before sending
+                if (!controller.sessionActivity!!.isImmutable) {
+                    controller.sessionActivity!!.send(PendingIntent.FLAG_IMMUTABLE)
+                } else {
+                    Log.w(
+                        "MediaSessionPlugin",
+                        "onClick: SessionActivity is immutable, cannot send PendingIntent."
+                    )
+                }
+            } catch (e: PendingIntent.CanceledException) {
+                Log.e("MediaSessionPlugin", "onClick: PendingIntent canceled.", e)
+            }
         }
     }
 

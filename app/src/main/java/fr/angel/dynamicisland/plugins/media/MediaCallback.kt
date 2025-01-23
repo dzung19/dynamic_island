@@ -3,9 +3,10 @@ package fr.angel.dynamicisland.plugins.media
 import android.media.MediaMetadata
 import android.media.session.MediaController
 import android.media.session.PlaybackState
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
+import androidx.annotation.RequiresApi
 
 class MediaCallback(
 	val mediaController: MediaController,
@@ -20,12 +21,13 @@ class MediaCallback(
 		if (mediaController.metadata != null && mediaController.playbackState != null) {
 			mediaMetadata = mediaController.metadata!!
 			mediaStruct.playbackState.value = mediaController.playbackState!!
-
+//			mediaController.sessionActivity?.send(PendingIntent.FLAG_IMMUTABLE)
 			updateMediaStruct(addPlugin = mediaStruct.playbackState.value.state == PlaybackState.STATE_PLAYING)
 		}
 	}
 
-	override fun onPlaybackStateChanged(state: PlaybackState?) {
+	@RequiresApi(Build.VERSION_CODES.N)
+    override fun onPlaybackStateChanged(state: PlaybackState?) {
 		super.onPlaybackStateChanged(state)
 		if (state == null) return
 		// Update the playback state
@@ -51,7 +53,9 @@ class MediaCallback(
 		}
 	}
 
-	override fun onSessionDestroyed() {
+
+	@RequiresApi(Build.VERSION_CODES.N)
+    override fun onSessionDestroyed() {
 		super.onSessionDestroyed()
 		context.removeMedia(mediaController)
 	}

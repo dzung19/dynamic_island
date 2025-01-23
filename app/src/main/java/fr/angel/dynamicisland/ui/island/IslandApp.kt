@@ -16,15 +16,23 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester.Companion.createRefs
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants.IterateForever
+import com.airbnb.lottie.compose.rememberLottieComposition
+import fr.angel.dynamicisland.R
 import fr.angel.dynamicisland.island.*
 import fr.angel.dynamicisland.model.service.IslandOverlayService
 import fr.angel.dynamicisland.ui.theme.DynamicIslandTheme
@@ -37,14 +45,18 @@ import fr.angel.dynamicisland.ui.theme.Theme
 fun IslandApp(
 	islandOverlayService: IslandOverlayService
 ) {
-	val context = LocalContext.current
-	Theme.instance.Init()
-	LaunchedEffect(Unit) {
-		IslandSettings.instance.loadSettings(context = context)
-	}
-
-	val islandView = islandOverlayService.islandState
-	val bindedPlugin = islandOverlayService.bindedPlugins.firstOrNull()
+    val context = LocalContext.current
+    Theme.instance.Init()
+    LaunchedEffect(Unit) {
+        IslandSettings.instance.loadSettings(context = context)
+    }
+    val composition =
+        rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.snow_fall))
+    val composition1 =
+        rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.snow_fall))
+    val (description, illustration) = createRefs()
+    val islandView = islandOverlayService.islandState
+    val bindedPlugin = islandOverlayService.bindedPlugins.firstOrNull()
 
 	val height by animateDpAsState(
 		targetValue = islandView.height,
@@ -128,37 +140,72 @@ fun IslandApp(
 						.height(height)
 						/*.wrapContentHeight()
 					.height(IntrinsicSize.Min)*/
-						.defaultMinSize(minHeight = height),
-					colors = CardDefaults.cardColors(
-						containerColor = MaterialTheme.colorScheme.surface,
-					)
-				) {
-					Crossfade(
-						targetState = islandOverlayService.islandState.state,
-						animationSpec = tween(100)
-					) {
-						when (it) {
-							IslandStates.Opened -> {
-								val boxModifier = Modifier
-									.fillMaxHeight()
+                        .defaultMinSize(minHeight = height),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                    )
+                ) {
+                    Box (contentAlignment = Alignment.Center){
+                        Crossfade(
+                            targetState = islandOverlayService.islandState.state,
+                            animationSpec = tween(100), label = ""
+                        ) {
+                            when (it) {
+                                IslandStates.Opened -> {
+                                    LottieAnimation(
+                                        composition = composition1.value,
+                                        iterations = IterateForever,
+                                        contentScale = ContentScale.Crop                                    )
+                                }
 
-								Row(
-									modifier = Modifier
-										.fillMaxSize()
-										.padding(4.dp),
-									verticalAlignment = Alignment.CenterVertically,
-									horizontalArrangement = Arrangement.SpaceBetween
-								) {
+                                IslandStates.Expanded -> {
+                                    LottieAnimation(
+                                        composition = composition1.value,
+                                        iterations = IterateForever,
+                                        contentScale = ContentScale.FillBounds
+                                    )
+                                }
 
-									// Left side
-									Box(
-										modifier = boxModifier,
-										contentAlignment = Alignment.CenterEnd
-									) {
-										Crossfade(
-											targetState = bindedPlugin,
-										) { plugin -> plugin?.LeftOpenedComposable() }
-									}
+                                IslandStates.Closed -> {
+                                    LottieAnimation(
+                                        composition = composition1.value,
+                                        iterations = IterateForever,
+                                        contentScale = ContentScale.Crop
+                                    )
+                                }
+                            }
+                        }
+//                        LottieAnimation(
+//                            composition = composition1.value,
+//                            iterations = IterateForever,
+//                            contentScale = if (islandOverlayService.islandState.state == IslandStates.Expanded) ContentScale.FillBounds else ContentScale.Crop
+//                        )
+                        Crossfade(
+                            targetState = islandOverlayService.islandState.state,
+                            animationSpec = tween(100), label = ""
+                        ) {
+                            when (it) {
+                                IslandStates.Opened -> {
+                                    val boxModifier = Modifier
+                                        .fillMaxHeight()
+//                                    Card {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(4.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        // Left side
+
+                                        Box(
+                                            modifier = boxModifier,
+                                            contentAlignment = Alignment.CenterEnd
+                                        ) {
+                                            Crossfade(
+                                                targetState = bindedPlugin,
+                                            ) { plugin -> plugin?.LeftOpenedComposable() }
+                                        }
 
 									// Right side
 									Box(
@@ -182,5 +229,5 @@ fun IslandApp(
 				}
 			}
 		}
-	}
+	}}
 }
