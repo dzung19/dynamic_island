@@ -80,7 +80,7 @@ fun IslandApp(
 				|| IslandSettings.instance.showOnLockScreen)
 				&& (!Island.isInLandscape || IslandSettings.instance.showInLandscape),
 		modifier = Modifier
-			.fillMaxWidth()
+
 			//.background(Color.Red)
 	) {
 		DynamicIslandTheme(
@@ -98,11 +98,7 @@ fun IslandApp(
 					.fillMaxWidth()
 					.offset(x = islandView.xPosition)
 					.clip(RoundedCornerShape(cornerPercentage)),
-				contentAlignment = when	(IslandSettings.instance.gravity) {
-					IslandGravity.Center -> Alignment.TopCenter
-					IslandGravity.Left -> Alignment.TopStart
-					IslandGravity.Right -> Alignment.TopEnd
-				}
+				contentAlignment = Alignment.TopCenter
 			) {
 				val clickModifier =
 					if (islandView is IslandViewState.Opened || islandView is IslandViewState.Expanded) {

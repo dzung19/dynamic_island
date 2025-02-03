@@ -16,7 +16,7 @@ class IslandSettings {
 	}
 
 	var positionX by mutableIntStateOf(0)
-	var positionY by mutableIntStateOf(5)
+	var positionY by mutableIntStateOf(0)
 	var width by mutableIntStateOf(150)
 	var height by mutableIntStateOf(200)
 	var cornerRadius by mutableIntStateOf(60)
