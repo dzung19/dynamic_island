@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Straighten
 import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -86,7 +87,7 @@ fun SettingsItem(
 fun SettingsDivider(
 	modifier: Modifier = Modifier,
 ) {
-	Divider(
+	HorizontalDivider(
 		modifier = modifier
 			.fillMaxWidth(),
 		color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)

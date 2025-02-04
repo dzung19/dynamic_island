@@ -17,13 +17,41 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.SkipNext
+import androidx.compose.material.icons.filled.SkipPrevious
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,10 +60,11 @@ import androidx.compose.ui.unit.dp
 import com.github.compose.waveloading.DrawType
 import com.github.compose.waveloading.WaveLoading
 import com.skydoves.landscapist.rememberDrawablePainter
-import fr.angel.dynamicisland.model.service.NotificationService
 import fr.angel.dynamicisland.model.service.IslandOverlayService
+import fr.angel.dynamicisland.model.service.NotificationService
 import fr.angel.dynamicisland.plugins.BasePlugin
 import fr.angel.dynamicisland.plugins.PluginSettingsItem
+
 
 class MediaSessionPlugin(
     override val id: String = "MediaSessionPlugin",
@@ -185,17 +214,16 @@ class MediaSessionPlugin(
 
             // Slider controlling the position in the song
             Slider(
-                value = if (isDragging) draggedPosition else animateFloatAsState(targetValue = if(songPosition.isNaN()) 0f else songPosition).value,
+                value = if (isDragging) draggedPosition else animateFloatAsState(targetValue = songPosition).value,
                 onValueChange = { value ->
                     Log.d("MediaSessionPlugin", "onValueChange: $value")
                     draggedPosition = value
                     isDragging = true
                 },
                 onValueChangeFinished = {
-                    Log.d("MediaSessionPlugin", "onValueChangeFinished: $draggedPosition")
                     controls.seekTo(((draggedPosition / 100) * duration).toLong())
                     isDragging = false
-                    draggedOffset = if(songPosition.isNaN()) 0f else songPosition - draggedPosition
+                    draggedOffset = songPosition - draggedPosition
                 },
                 valueRange = 0f..100f,
             )
@@ -240,23 +268,10 @@ class MediaSessionPlugin(
         val current = callbackMap.values.firstOrNull() ?: return
 
         val controller = current.mediaController
-
-        Log.d("MediaSessionPlugin", "onClick: ${controller.sessionActivity}")
-        if (controller.sessionActivity != null) {
-            try {
-                // Ensure the PendingIntent is not canceled before sending
-                if (!controller.sessionActivity!!.isImmutable) {
-                    controller.sessionActivity!!.send(PendingIntent.FLAG_IMMUTABLE)
-                } else {
-                    Log.w(
-                        "MediaSessionPlugin",
-                        "onClick: SessionActivity is immutable, cannot send PendingIntent."
-                    )
-                }
-            } catch (e: PendingIntent.CanceledException) {
-                Log.e("MediaSessionPlugin", "onClick: PendingIntent canceled.", e)
-            }
-        }
+        val packageManager = context.packageManager
+        val intent = packageManager.getLaunchIntentForPackage(controller.packageName) ?: return
+        val pendingIntent = PendingIntent.getActivity(context,0,intent,PendingIntent.FLAG_IMMUTABLE)
+        pendingIntent.send()
     }
 
     override fun onDestroy() {
