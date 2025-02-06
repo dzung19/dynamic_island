@@ -214,7 +214,7 @@ class MediaSessionPlugin(
 
             // Slider controlling the position in the song
             Slider(
-                value = if (isDragging) draggedPosition else animateFloatAsState(targetValue = songPosition).value,
+                value = if (isDragging) draggedPosition else animateFloatAsState(if(songPosition.isNaN()) 0f else songPosition).value,
                 onValueChange = { value ->
                     Log.d("MediaSessionPlugin", "onValueChange: $value")
                     draggedPosition = value
@@ -223,7 +223,7 @@ class MediaSessionPlugin(
                 onValueChangeFinished = {
                     controls.seekTo(((draggedPosition / 100) * duration).toLong())
                     isDragging = false
-                    draggedOffset = songPosition - draggedPosition
+                    draggedOffset = if(songPosition.isNaN()) 0f else songPosition - draggedPosition
                 },
                 valueRange = 0f..100f,
             )
