@@ -16,31 +16,58 @@ import android.util.Log
 import android.view.inputmethod.InputMethodManager
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.displayCutoutPadding
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.DismissDirection
+import androidx.compose.material.DismissValue
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ExposedDropdownMenuDefaults.textFieldColors
+import androidx.compose.material.FractionalThreshold
+import androidx.compose.material.SwipeToDismiss
+import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.rememberDismissState
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -162,13 +189,14 @@ class NotificationPlugin(
 	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(context: IslandOverlayService?) {
 		this.context = context ?: return
+		Log.d(id, "onCreate")
 		val filter = IntentFilter()
 		filter.addAction(NOTIFICATION_POSTED)
 		filter.addAction(NOTIFICATION_REMOVED)
-		context.registerReceiver(mBroadcastReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+		context.registerReceiver(mBroadcastReceiver, filter, Context.RECEIVER_EXPORTED)
 	}
 
-	@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
+	@OptIn(ExperimentalMaterialApi::class)
 	@Composable
 	override fun Composable() {
 		val meta = notificationMeta.value ?: return
@@ -180,6 +208,7 @@ class NotificationPlugin(
 			confirmStateChange = {
 				if (it == DismissValue.DismissedToStart || it == DismissValue.DismissedToEnd) {
 					context.sendBroadcast(Intent(ACTION_CLOSE))
+					onLeftSwipe()
 				}
 				true
 			}
@@ -290,8 +319,12 @@ class NotificationPlugin(
 					horizontalArrangement = Arrangement.spacedBy(8.dp)
 				) {
 					var isReplying by remember { mutableStateOf(false) }
-					var replyText by rememberSaveable(stateSaver = TextFieldValue.Saver) { mutableStateOf(TextFieldValue("")) }
+					val replyText = rememberSaveable(stateSaver = TextFieldValue.Saver) { mutableStateOf(TextFieldValue("abc")) }
+					val showKeyboard = remember { mutableStateOf(false) }
+					val focusRequester = remember { FocusRequester() }
+					val keyboard = LocalSoftwareKeyboardController.current
 
+// LaunchedEffect prevents endless focus request
 					meta.actions.forEach { action ->
 						val remoteInput = action.remoteInputs?.firstOrNull()
 
@@ -338,39 +371,44 @@ class NotificationPlugin(
 									.weight(1f),
 								verticalAlignment = Alignment.CenterVertically
 							) {
-
-
 								TextField(
-									value = replyText,
-									onValueChange = { replyText = it },
 									modifier = Modifier
 										.weight(1f)
+										.fillMaxSize()
+										.focusRequester(focusRequester)
 										.onFocusChanged {
-											Log.d("Focus", it.isFocused.toString())
 											val imm =
 												context.getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-											if (it.isFocused) {
-												imm.toggleSoftInput(
-													InputMethodManager.SHOW_FORCED,
-													0
-												)
-											}
+											val composeView = ComposeView(context)
+											imm.showSoftInput(
+												composeView,
+												InputMethodManager.SHOW_IMPLICIT
+											)
 										}
 										.displayCutoutPadding(),
+									value = replyText.value,
+									onValueChange = {
+										replyText.value = it
+										showKeyboard.value = true
+										keyboard?.show()
+									},
+									keyboardOptions = KeyboardOptions(
+										imeAction = ImeAction.Done
+									),
 									shape = CircleShape,
 									singleLine = true,
 									colors = textFieldColors(
-                                                                    focusedIndicatorColor = Color.Transparent,
-                                                                    unfocusedIndicatorColor = Color.Transparent,
-                                                                    disabledIndicatorColor = Color.Transparent,
-                                                                    errorIndicatorColor = Color.Transparent,
-                                                                ),
+										focusedIndicatorColor = Color.Black,
+										unfocusedIndicatorColor = Color.Transparent,
+										disabledIndicatorColor = Color.Transparent,
+										errorIndicatorColor = Color.Transparent,
+									),
 								)
 								IconButton(onClick = {
 									// Send reply action
 									val intent = Intent().addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
 									val bundle = Bundle().apply {
-										putCharSequence(remoteInput.resultKey, replyText.text)
+										putCharSequence(remoteInput.resultKey, replyText.value.text)
 									}
 									RemoteInput.addResultsToIntent(action.remoteInputs, intent, bundle)
 									action.actionIntent.send(context, 0, intent)
@@ -380,9 +418,14 @@ class NotificationPlugin(
 									})
 								}) {
 									Icon(
-										imageVector = Icons.Default.Send,
+										imageVector = Icons.AutoMirrored.Filled.Send,
 										contentDescription = null
 									)
+								}
+								LaunchedEffect(focusRequester) {
+									if (showKeyboard.value) {
+										focusRequester.requestFocus()
+									}
 								}
 							}
 						}
@@ -397,6 +440,9 @@ class NotificationPlugin(
 		val intent = Intent(ACTION_OPEN_CLOSE)
 		intent.putExtra("id", meta.id)
 		context.sendBroadcast(intent)
+		val packageManager = context.packageManager
+		val i = packageManager.getLaunchIntentForPackage(meta.packageName) ?: return
+		context.startActivity(i)
 	}
 
 	override fun onDestroy() {

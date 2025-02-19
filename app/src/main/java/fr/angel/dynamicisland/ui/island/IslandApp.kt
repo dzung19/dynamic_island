@@ -53,7 +53,7 @@ fun IslandApp(
     val composition =
         rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.snow_fall))
     val composition1 =
-        rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.snow_fall))
+        rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.valentine))
     val (description, illustration) = createRefs()
     val islandView = islandOverlayService.islandState
     val bindedPlugin = islandOverlayService.bindedPlugins.firstOrNull()
@@ -171,11 +171,6 @@ fun IslandApp(
                                 }
                             }
                         }
-//                        LottieAnimation(
-//                            composition = composition1.value,
-//                            iterations = IterateForever,
-//                            contentScale = if (islandOverlayService.islandState.state == IslandStates.Expanded) ContentScale.FillBounds else ContentScale.Crop
-//                        )
                         Crossfade(
                             targetState = islandOverlayService.islandState.state,
                             animationSpec = tween(100), label = ""
