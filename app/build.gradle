@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace 'fr.angel.dynamicisland'
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         applicationId "fr.angel.dynamicisland"
         minSdk 23
-        targetSdk 35
+        targetSdk 36
         versionCode 5
         versionName '1.0.4'
 
@@ -50,26 +50,26 @@ android {
 dependencies {
 
     // Compose
-    implementation platform('androidx.compose:compose-bom:2024.11.00')
+    implementation platform('androidx.compose:compose-bom:2025.09.00')
     implementation 'androidx.compose.ui:ui'
     implementation 'androidx.compose.ui:ui-graphics'
     implementation 'androidx.compose.ui:ui-tooling-preview'
     // Override BOM version to get the below alpha version of Material3 components (used by: ModalBottomSheet)
-    implementation 'androidx.compose.material3:material3:1.3.1'
+    implementation 'androidx.compose.material3:material3:1.3.2'
     implementation 'androidx.compose.material:material-icons-extended'
     implementation "androidx.compose.ui:ui-text-google-fonts"
     implementation "androidx.compose.runtime:runtime-livedata"
 
     // Additional Compose dependencies
-    implementation 'androidx.constraintlayout:constraintlayout-compose:1.1.0'
-    implementation 'androidx.compose.material:material:1.7.6'
-    implementation 'androidx.navigation:navigation-compose:2.8.4'
-    implementation("androidx.media3:media3-session:1.5.1")
+    implementation 'androidx.constraintlayout:constraintlayout-compose:1.1.1'
+    implementation 'androidx.compose.material:material:1.9.1'
+    implementation 'androidx.navigation:navigation-compose:2.9.4'
+    implementation("androidx.media3:media3-session:1.8.0")
 
     // Firebase
-    implementation platform('com.google.firebase:firebase-bom:33.6.0')
-    implementation 'com.google.firebase:firebase-auth-ktx'
-    implementation 'com.google.firebase:firebase-firestore-ktx'
+    implementation platform('com.google.firebase:firebase-bom:34.2.0')
+//    implementation 'com.google.firebase:firebase-auth-ktx'
+//    implementation 'com.google.firebase:firebase-firestore-ktx'
 
     // Accompanist
     var accompanist_version = '0.36.0'
@@ -77,10 +77,10 @@ dependencies {
     implementation "com.google.accompanist:accompanist-placeholder-material:$accompanist_version"
     implementation "com.google.accompanist:accompanist-flowlayout:$accompanist_version"
     implementation "com.google.accompanist:accompanist-webview:$accompanist_version"
-    implementation "com.google.accompanist:accompanist-navigation-animation:0.31.3-beta"
+    implementation "com.google.accompanist:accompanist-navigation-animation:0.36.0"
 
     // Landscapist
-    implementation 'com.github.skydoves:landscapist-bom:2.3.4'
+    implementation 'com.github.skydoves:landscapist-bom:2.6.0'
     implementation "com.github.skydoves:landscapist-glide"
     implementation "com.github.skydoves:landscapist-palette"
     implementation "com.github.skydoves:landscapist-animation"
@@ -88,23 +88,23 @@ dependencies {
     // Other
     implementation 'androidx.core:core-splashscreen:1.0.1' // Splash screen
     implementation 'io.coil-kt:coil-compose:2.7.0' // Image loading
-    implementation 'com.google.code.gson:gson:2.11.0' // Serialization / Deserialization
-    implementation "com.airbnb.android:lottie-compose:6.5.1" // Animations
+    implementation 'com.google.code.gson:gson:2.13.2' // Serialization / Deserialization
+    implementation "com.airbnb.android:lottie-compose:6.6.9" // Animations
     implementation 'com.github.vitaviva:ComposeWaveLoading:0.1.4' // Wave animation: https://github.com/vitaviva/ComposeWaveLoading
 
     // Compose Tests
-    androidTestImplementation platform('androidx.compose:compose-bom:2024.11.00')
+    androidTestImplementation platform('androidx.compose:compose-bom:2025.09.00')
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
 
-    implementation 'androidx.core:core-ktx:1.15.0'
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.7'
-    implementation 'androidx.activity:activity-compose:1.9.3'
+    implementation 'androidx.core:core-ktx:1.17.0'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.9.3'
+    implementation 'androidx.activity:activity-compose:1.11.0'
 
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.3.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.7.0'
 
     //implementation 'com.google.android.gms:play-services-auth:20.5.0'
 }
