@@ -49,7 +49,7 @@ fun DisclosureScreen(
 
 	Box(modifier = modifier.fillMaxSize()
 	) {
-		_root_ide_package_.com.daumo.dynamicis.ui.animation.WavesLoadingIndicator(
+		WavesLoadingIndicator(
             modifier = Modifier
                 .fillMaxSize()
                 .alpha(0.4f),

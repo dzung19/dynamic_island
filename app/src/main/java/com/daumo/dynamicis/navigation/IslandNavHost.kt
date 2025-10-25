@@ -28,45 +28,45 @@ fun IslandNavHost(
 	) {
 		// Main destinations
 		composable(IslandHome.route) {
-            _root_ide_package_.com.daumo.dynamicis.ui.home.HomeScreen(
+            HomeScreen(
                 onGetStartedClick = {
                     navController.navigateSingleTopTo(IslandPlugins.route)
                 },
                 onShowDisclosureClick = {
                     navController.navigateSingleTopTo(
-                        _root_ide_package_.com.daumo.dynamicis.ui.settings.AboutSetting.route)
+                        AboutSetting.route)
                 },
             )
 		}
 		composable(IslandPlugins.route) {
-            _root_ide_package_.com.daumo.dynamicis.ui.plugins.PluginScreen(
+            PluginScreen(
                 onPluginClicked = { plugin ->
                     navController.navigateToPluginSettings(plugin.id)
                 }
             )
 		}
 		composable(IslandSettings.route) {
-            _root_ide_package_.com.daumo.dynamicis.ui.settings.SettingsScreen(
+            SettingsScreen(
                 onSettingClicked = { setting ->
                     navController.navigate(setting.route)
                 }
             )
 		}
 		// Settings screens
-		composable(_root_ide_package_.com.daumo.dynamicis.ui.settings.ThemeSetting.route) {
-            _root_ide_package_.com.daumo.dynamicis.ui.settings.pages.ThemeSettingsScreen()
+		composable(ThemeSetting.route) {
+            ThemeSettingsScreen()
 		}
-		composable(_root_ide_package_.com.daumo.dynamicis.ui.settings.BehaviorSetting.route) {
-            _root_ide_package_.com.daumo.dynamicis.ui.settings.pages.BehaviorSettingsScreen()
+		composable(BehaviorSetting.route) {
+            BehaviorSettingsScreen()
 		}
-		composable(_root_ide_package_.com.daumo.dynamicis.ui.settings.PositionSizeSetting.route) {
-            _root_ide_package_.com.daumo.dynamicis.ui.settings.pages.PositionSizeSettingsScreen()
+		composable(PositionSizeSetting.route) {
+            PositionSizeSettingsScreen()
 		}
-		composable(_root_ide_package_.com.daumo.dynamicis.ui.settings.EnabledAppsSetting.route) {
-            _root_ide_package_.com.daumo.dynamicis.ui.settings.pages.EnabledAppsSettingsScreen()
+		composable(EnabledAppsSetting.route) {
+            EnabledAppsSettingsScreen()
 		}
-		composable(_root_ide_package_.com.daumo.dynamicis.ui.settings.AboutSetting.route) {
-            _root_ide_package_.com.daumo.dynamicis.ui.settings.pages.AboutSettingsScreen()
+		composable(AboutSetting.route) {
+            AboutSettingsScreen()
 		}
 
 		// Plugin settings
@@ -79,7 +79,7 @@ fun IslandNavHost(
 
 			if (pluginId != null) {
 				PluginSettingsScreen(
-					plugin = _root_ide_package_.com.daumo.dynamicis.plugins.ExportedPlugins.Companion.getPlugin(pluginId)
+					plugin = ExportedPlugins.Companion.getPlugin(pluginId)
 				)
 			}
 		}

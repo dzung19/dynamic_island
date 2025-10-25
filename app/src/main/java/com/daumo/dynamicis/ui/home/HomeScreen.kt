@@ -41,8 +41,11 @@ import com.daumo.dynamicis.model.SETTINGS_KEY
 import com.daumo.dynamicis.model.packageName
 import com.daumo.dynamicis.model.service.IslandOverlayService
 import com.daumo.dynamicis.plugins.ExportedPlugins
+import androidx.core.content.edit
+import androidx.core.net.toUri
 
 
+@SuppressLint("UseKtx")
 @Composable
 fun HomeScreen(
 	onGetStartedClick: () -> Unit,
@@ -51,11 +54,11 @@ fun HomeScreen(
 
 	val context = LocalContext.current
 
-	val settingsPreferences = context.getSharedPreferences(_root_ide_package_.com.daumo.dynamicis.model.SETTINGS_KEY, Context.MODE_PRIVATE)
+	val settingsPreferences = context.getSharedPreferences(SETTINGS_KEY, Context.MODE_PRIVATE)
 	var optimizationDismissed by remember { mutableStateOf(settingsPreferences.getBoolean(
-		_root_ide_package_.com.daumo.dynamicis.model.BATTERY_OPTIMIZATION_DISMISSED, false)) }
+		BATTERY_OPTIMIZATION_DISMISSED, false)) }
 	var disclosureAccepted by remember { mutableStateOf(settingsPreferences.getBoolean(
-		_root_ide_package_.com.daumo.dynamicis.model.DISCLOSURE_ACCEPTED, false)) }
+		DISCLOSURE_ACCEPTED, false)) }
 
 	// Celebration animation
 	val celebrateComposition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.celebrate))
@@ -64,12 +67,12 @@ fun HomeScreen(
 	// Permissions
 	var isOverlayGranted by remember { mutableStateOf(canDrawOverlays(context)) }
 	var isAccessibilityGranted by remember { mutableStateOf(isAccessibilityServiceEnabled(
-		_root_ide_package_.com.daumo.dynamicis.model.service.IslandOverlayService::class.java, context)) }
+		IslandOverlayService::class.java, context)) }
 
 	// Permissions request
 	val startForPermissionResult = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
 		isAccessibilityGranted = isAccessibilityServiceEnabled(
-			_root_ide_package_.com.daumo.dynamicis.model.service.IslandOverlayService::class.java, context)
+			IslandOverlayService::class.java, context)
 		isOverlayGranted = canDrawOverlays(context)
 
 		if (isAccessibilityGranted && isOverlayGranted) {
@@ -88,7 +91,7 @@ fun HomeScreen(
 			)
 		} else {
 			// Automatically disable the accessibility service
-			_root_ide_package_.com.daumo.dynamicis.model.service.IslandOverlayService.Companion.getInstance()?.disableSelf()
+			IslandOverlayService.Companion.getInstance()?.disableSelf()
 			isAccessibilityGranted = false
 		}
 	}
@@ -96,10 +99,10 @@ fun HomeScreen(
 	// Battery optimization
 	val powerManager = context.getSystemService(POWER_SERVICE) as PowerManager
 	var isIgnoringBatteryOptimizations by remember { mutableStateOf(!powerManager.isIgnoringBatteryOptimizations(
-		_root_ide_package_.com.daumo.dynamicis.model.packageName)) }
+		packageName)) }
 	val startForBatteryOptimizationResult = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
 		isIgnoringBatteryOptimizations = !powerManager.isIgnoringBatteryOptimizations(
-			_root_ide_package_.com.daumo.dynamicis.model.packageName)
+			packageName)
 	}
 
 	// UI
@@ -134,8 +137,9 @@ fun HomeScreen(
 				DisclosureCard(
 					onAcceptClick = {
 						disclosureAccepted = true
-						settingsPreferences.edit().putBoolean(
-							_root_ide_package_.com.daumo.dynamicis.model.DISCLOSURE_ACCEPTED, true).apply()
+                        settingsPreferences.edit {
+                            putBoolean(
+                                DISCLOSURE_ACCEPTED, true)}
 					},
 					onShowClick = onShowDisclosureClick
 				)
@@ -144,7 +148,7 @@ fun HomeScreen(
 
 		item {
 			AnimatedVisibility(
-				visible = _root_ide_package_.com.daumo.dynamicis.plugins.ExportedPlugins.Companion.plugins.all { !it.active },
+				visible = ExportedPlugins.Companion.plugins.all { !it.active },
 			) {
 				NoPluginsActivatedCard(
 					onGetStartedClick = onGetStartedClick
@@ -161,7 +165,7 @@ fun HomeScreen(
 					onDismiss = {
 						optimizationDismissed = true
 						settingsPreferences.edit().putBoolean(
-							_root_ide_package_.com.daumo.dynamicis.model.BATTERY_OPTIMIZATION_DISMISSED, true).apply()
+							BATTERY_OPTIMIZATION_DISMISSED, true).apply()
 					}
 				)
 			}
@@ -540,7 +544,7 @@ fun PermissionsCard(
 						startForResult.launch(
 							Intent(
 								Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-								Uri.parse("package:${_root_ide_package_.com.daumo.dynamicis.model.packageName}")
+                                "package:${packageName}".toUri()
 							), null
 						)
 					}

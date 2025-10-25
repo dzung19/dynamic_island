@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.daumo.dynamicis.model.*
+import androidx.core.content.edit
 
 class IslandSettings {
 
@@ -31,36 +32,36 @@ class IslandSettings {
 	var autoHideOpenedAfter by mutableFloatStateOf(5000f)
 
 	fun applySettings(context: Context) {
-		val settings = context.getSharedPreferences(_root_ide_package_.com.daumo.dynamicis.model.SETTINGS_KEY, Context.MODE_PRIVATE)
-		settings.edit()
-			.putInt(_root_ide_package_.com.daumo.dynamicis.model.POSITION_X, positionX)
-			.putInt(_root_ide_package_.com.daumo.dynamicis.model.POSITION_Y, positionY)
-			.putInt(_root_ide_package_.com.daumo.dynamicis.model.SIZE_X, width)
-			.putInt(_root_ide_package_.com.daumo.dynamicis.model.SIZE_Y, height)
-			.putInt(_root_ide_package_.com.daumo.dynamicis.model.CORNER_RADIUS, cornerRadius)
-			.putStringSet(_root_ide_package_.com.daumo.dynamicis.model.ENABLED_APPS, enabledApps.toSet())
-			.putBoolean(_root_ide_package_.com.daumo.dynamicis.model.SHOW_ON_LOCK_SCREEN, showOnLockScreen)
-			.putBoolean(_root_ide_package_.com.daumo.dynamicis.model.SHOW_IN_LANDSCAPE, showInLandscape)
-			.putFloat(_root_ide_package_.com.daumo.dynamicis.model.AUTO_HIDE_OPENED_AFTER, autoHideOpenedAfter)
-			.putBoolean(_root_ide_package_.com.daumo.dynamicis.model.SHOW_BORDER, showBorders)
-			.putString(_root_ide_package_.com.daumo.dynamicis.model.GRAVITY, gravity.name)
-			.apply()
+		val settings = context.getSharedPreferences(SETTINGS_KEY, Context.MODE_PRIVATE)
+		settings.edit {
+            putInt(POSITION_X, positionX)
+                .putInt(POSITION_Y, positionY)
+                .putInt(SIZE_X, width)
+                .putInt(SIZE_Y, height)
+                .putInt(CORNER_RADIUS, cornerRadius)
+                .putStringSet(ENABLED_APPS, enabledApps.toSet())
+                .putBoolean(SHOW_ON_LOCK_SCREEN, showOnLockScreen)
+                .putBoolean(SHOW_IN_LANDSCAPE, showInLandscape)
+                .putFloat(AUTO_HIDE_OPENED_AFTER, autoHideOpenedAfter)
+                .putBoolean(SHOW_BORDER, showBorders)
+                .putString(GRAVITY, gravity.name)
+        }
 	}
 
 	fun loadSettings(context: Context) {
-		val settings = context.getSharedPreferences(_root_ide_package_.com.daumo.dynamicis.model.SETTINGS_KEY, Context.MODE_PRIVATE)
-		positionX = settings.getInt(_root_ide_package_.com.daumo.dynamicis.model.POSITION_X, 0)
-		positionY = settings.getInt(_root_ide_package_.com.daumo.dynamicis.model.POSITION_Y, 5)
-		width = settings.getInt(_root_ide_package_.com.daumo.dynamicis.model.SIZE_X, 150)
-		height = settings.getInt(_root_ide_package_.com.daumo.dynamicis.model.SIZE_Y, 200)
-		cornerRadius = settings.getInt(_root_ide_package_.com.daumo.dynamicis.model.CORNER_RADIUS, 60)
+		val settings = context.getSharedPreferences(SETTINGS_KEY, Context.MODE_PRIVATE)
+		positionX = settings.getInt(POSITION_X, 0)
+		positionY = settings.getInt(POSITION_Y, 5)
+		width = settings.getInt(SIZE_X, 150)
+		height = settings.getInt(SIZE_Y, 200)
+		cornerRadius = settings.getInt(CORNER_RADIUS, 60)
 		enabledApps.clear()
-		enabledApps.addAll(settings.getStringSet(_root_ide_package_.com.daumo.dynamicis.model.ENABLED_APPS, setOf()) ?: setOf())
-		showOnLockScreen = settings.getBoolean(_root_ide_package_.com.daumo.dynamicis.model.SHOW_ON_LOCK_SCREEN, false)
-		showInLandscape = settings.getBoolean(_root_ide_package_.com.daumo.dynamicis.model.SHOW_IN_LANDSCAPE, false)
-		autoHideOpenedAfter = settings.getFloat(_root_ide_package_.com.daumo.dynamicis.model.AUTO_HIDE_OPENED_AFTER, 5000f)
-		showBorders = settings.getBoolean(_root_ide_package_.com.daumo.dynamicis.model.SHOW_BORDER, false)
-		gravity = IslandGravity.valueOf(settings.getString(_root_ide_package_.com.daumo.dynamicis.model.GRAVITY, IslandGravity.Center.name) ?: IslandGravity.Center.name)
+		enabledApps.addAll(settings.getStringSet(ENABLED_APPS, setOf()) ?: setOf())
+		showOnLockScreen = settings.getBoolean(SHOW_ON_LOCK_SCREEN, false)
+		showInLandscape = settings.getBoolean(SHOW_IN_LANDSCAPE, false)
+		autoHideOpenedAfter = settings.getFloat(AUTO_HIDE_OPENED_AFTER, 5000f)
+		showBorders = settings.getBoolean(SHOW_BORDER, false)
+		gravity = IslandGravity.valueOf(settings.getString(GRAVITY, IslandGravity.Center.name) ?: IslandGravity.Center.name)
 	}
 }
 

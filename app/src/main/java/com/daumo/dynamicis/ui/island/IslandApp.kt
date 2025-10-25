@@ -43,12 +43,12 @@ import com.daumo.dynamicis.ui.theme.Theme
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun IslandApp(
-	islandOverlayService: com.daumo.dynamicis.model.service.IslandOverlayService
+	islandOverlayService: IslandOverlayService
 ) {
     val context = LocalContext.current
-    _root_ide_package_.com.daumo.dynamicis.ui.theme.Theme.Companion.instance.Init()
+    Theme.Companion.instance.Init()
     LaunchedEffect(Unit) {
-        _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.loadSettings(context = context)
+        IslandSettings.Companion.instance.loadSettings(context = context)
     }
     val composition =
         rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.snow_fall))
@@ -76,16 +76,16 @@ fun IslandApp(
 	val cornerPercentage by animateFloatAsState(targetValue = islandView.cornerPercentage)
 
 	AnimatedVisibility(
-		visible = (_root_ide_package_.com.daumo.dynamicis.island.Island.isScreenOn
-				|| _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.showOnLockScreen)
-				&& (!_root_ide_package_.com.daumo.dynamicis.island.Island.isInLandscape || _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.showInLandscape),
+		visible = (Island.isScreenOn
+				|| IslandSettings.Companion.instance.showOnLockScreen)
+				&& (!Island.isInLandscape || IslandSettings.Companion.instance.showInLandscape),
 		modifier = Modifier
 
 			//.background(Color.Red)
 	) {
-        _root_ide_package_.com.daumo.dynamicis.ui.theme.DynamicIslandTheme(
-            darkTheme = if (islandOverlayService.invertedTheme) !_root_ide_package_.com.daumo.dynamicis.ui.theme.Theme.Companion.instance.isDarkTheme else _root_ide_package_.com.daumo.dynamicis.ui.theme.Theme.Companion.instance.isDarkTheme,
-            style = _root_ide_package_.com.daumo.dynamicis.ui.theme.Theme.Companion.instance.themeStyle
+        DynamicIslandTheme(
+            darkTheme = if (islandOverlayService.invertedTheme) !Theme.Companion.instance.isDarkTheme else Theme.Companion.instance.isDarkTheme,
+            style = Theme.Companion.instance.themeStyle
         ) {
             Box(
                 modifier = Modifier
@@ -101,7 +101,7 @@ fun IslandApp(
                 contentAlignment = Alignment.TopCenter
             ) {
                 val clickModifier =
-                    if (islandView is com.daumo.dynamicis.island.IslandViewState.Opened || islandView is com.daumo.dynamicis.island.IslandViewState.Expanded) {
+                    if (islandView is IslandViewState.Opened || islandView is IslandViewState.Expanded) {
                         Modifier
                             .clip(RoundedCornerShape(cornerPercentage))
                             .combinedClickable(
@@ -117,7 +117,7 @@ fun IslandApp(
                     }
 
                 val borderModifier =
-                    if (_root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.showBorders) {
+                    if (IslandSettings.Companion.instance.showBorders) {
                         Modifier
                             .border(
                                 width = 1.dp,
@@ -148,14 +148,14 @@ fun IslandApp(
                             animationSpec = tween(100), label = ""
                         ) {
                             when (it) {
-                                _root_ide_package_.com.daumo.dynamicis.island.IslandStates.Opened -> {
+                                IslandStates.Opened -> {
                                     LottieAnimation(
                                         composition = composition1.value,
                                         iterations = IterateForever,
                                         contentScale = ContentScale.Crop)
                                 }
 
-                                _root_ide_package_.com.daumo.dynamicis.island.IslandStates.Expanded -> {
+                                IslandStates.Expanded -> {
                                     LottieAnimation(
                                         composition = composition1.value,
                                         iterations = IterateForever,
@@ -163,7 +163,7 @@ fun IslandApp(
                                     )
                                 }
 
-                                _root_ide_package_.com.daumo.dynamicis.island.IslandStates.Closed -> {
+                                IslandStates.Closed -> {
                                     LottieAnimation(
                                         composition = composition1.value,
                                         iterations = IterateForever,
@@ -177,7 +177,7 @@ fun IslandApp(
                             animationSpec = tween(100), label = ""
                         ) {
                             when (it) {
-                                _root_ide_package_.com.daumo.dynamicis.island.IslandStates.Opened -> {
+                                IslandStates.Opened -> {
                                     val boxModifier = Modifier
                                         .fillMaxHeight()
 //                                    Card {
@@ -211,7 +211,7 @@ fun IslandApp(
                                     }
                                 }
 
-                                _root_ide_package_.com.daumo.dynamicis.island.IslandStates.Expanded -> {
+                                IslandStates.Expanded -> {
                                     Crossfade(
                                         targetState = bindedPlugin,
                                     ) { plugin -> plugin?.Composable() }

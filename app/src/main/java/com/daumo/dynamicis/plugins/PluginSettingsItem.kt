@@ -15,7 +15,7 @@ sealed class PluginSettingsItem {
 		var id: String,
 		var value: MutableState<Boolean> = mutableStateOf(false),
 		val onValueChange: (Context, Boolean) -> Unit = { context, enabled ->
-			val editor = context.getSharedPreferences(_root_ide_package_.com.daumo.dynamicis.model.PLUGIN_SETTINGS_KEY, Context.MODE_PRIVATE).edit()
+			val editor = context.getSharedPreferences(PLUGIN_SETTINGS_KEY, Context.MODE_PRIVATE).edit()
 			editor.putBoolean(id, enabled)
 			editor.apply()
 
@@ -24,7 +24,7 @@ sealed class PluginSettingsItem {
 	) : PluginSettingsItem() {
 		fun isSettingEnabled(context: Context, id: String): Boolean {
 			val preferences = context.getSharedPreferences(
-                _root_ide_package_.com.daumo.dynamicis.model.PLUGIN_SETTINGS_KEY, Context.MODE_PRIVATE)
+                PLUGIN_SETTINGS_KEY, Context.MODE_PRIVATE)
 			return preferences.getBoolean(id, value.value)
 		}
 	}

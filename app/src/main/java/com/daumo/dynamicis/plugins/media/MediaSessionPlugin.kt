@@ -124,12 +124,12 @@ class MediaSessionPlugin(
         // Register the listener for active sessions
         mediaSessionManager.addOnActiveSessionsChangedListener(
             listenerForActiveSessions,
-            ComponentName(context, _root_ide_package_.com.daumo.dynamicis.model.service.NotificationService::class.java)
+            ComponentName(context, NotificationService::class.java)
         )
         mediaSessionManager.getActiveSessions(
             ComponentName(
                 context,
-                _root_ide_package_.com.daumo.dynamicis.model.service.NotificationService::class.java
+                NotificationService::class.java
             )
         ).forEach { controller ->
             // Cancel if already exists

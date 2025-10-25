@@ -56,6 +56,7 @@ import com.daumo.dynamicis.plugins.ExportedPlugins
 import com.daumo.dynamicis.ui.settings.settings
 import com.daumo.dynamicis.ui.theme.DynamicIslandTheme
 import com.daumo.dynamicis.ui.theme.Theme
+import androidx.core.content.edit
 
 
 class MainActivity : ComponentActivity() {
@@ -74,24 +75,24 @@ class MainActivity : ComponentActivity() {
 		super.onCreate(savedInstanceState)
 		instance = this
 
-		settingsPreferences = getSharedPreferences(_root_ide_package_.com.daumo.dynamicis.model.SETTINGS_KEY, Context.MODE_PRIVATE)
+		settingsPreferences = getSharedPreferences(SETTINGS_KEY, Context.MODE_PRIVATE)
 
 		WindowCompat.setDecorFitsSystemWindows(window, false)
 
 		// Invert theme in app
-		settingsPreferences.edit().putBoolean(_root_ide_package_.com.daumo.dynamicis.model.THEME_INVERTED, true).apply()
-		sendBroadcast(Intent(_root_ide_package_.com.daumo.dynamicis.model.SETTINGS_THEME_INVERTED))
+		settingsPreferences.edit { putBoolean(THEME_INVERTED, true) }
+		sendBroadcast(Intent(SETTINGS_THEME_INVERTED))
 
 		setContent {
 			// Setup plugins
-			_root_ide_package_.com.daumo.dynamicis.plugins.ExportedPlugins.Companion.setupPlugins(LocalContext.current)
+			ExportedPlugins.Companion.setupPlugins(LocalContext.current)
 
 			// Init
-			_root_ide_package_.com.daumo.dynamicis.ui.theme.Theme.Companion.instance.Init()
-			_root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.loadSettings(this)
+			Theme.Companion.instance.Init()
+			IslandSettings.Companion.instance.loadSettings(this)
 
 			val disclosureAccepted by remember { mutableStateOf(settingsPreferences.getBoolean(
-				_root_ide_package_.com.daumo.dynamicis.model.DISCLOSURE_ACCEPTED, false)
+				DISCLOSURE_ACCEPTED, false)
 			) }
 
 			if (!disclosureAccepted) {
@@ -99,8 +100,8 @@ class MainActivity : ComponentActivity() {
 				finish()
 			}
 
-			_root_ide_package_.com.daumo.dynamicis.ui.theme.DynamicIslandTheme(
-				darkTheme = _root_ide_package_.com.daumo.dynamicis.ui.theme.Theme.Companion.instance.isDarkTheme,
+			DynamicIslandTheme(
+				darkTheme = Theme.Companion.instance.isDarkTheme,
 			) {
 				// A surface container using the 'background' color from the theme
 				Surface(
@@ -109,18 +110,18 @@ class MainActivity : ComponentActivity() {
 				) {
 					// Navigation
 					val settingsRoutes =
-						_root_ide_package_.com.daumo.dynamicis.ui.settings.settings.map { (it as com.daumo.dynamicis.navigation.IslandDestination).route }
+						settings.map { (it as IslandDestination).route }
 
 					val navController = rememberNavController()
 					val currentBackStack by navController.currentBackStackEntryAsState()
 					val currentDestination = currentBackStack?.destination
-					val currentScreen: com.daumo.dynamicis.navigation.IslandDestination =
-						_root_ide_package_.com.daumo.dynamicis.navigation.bottomDestinations.find { it.route == currentDestination?.route }
+					val currentScreen: IslandDestination =
+						bottomDestinations.find { it.route == currentDestination?.route }
 							?:
 							// If current destination is contained in settings
-							(_root_ide_package_.com.daumo.dynamicis.ui.settings.settings.find { (it as com.daumo.dynamicis.navigation.IslandDestination).route == currentDestination?.route }
-								?: if (currentDestination?.route == _root_ide_package_.com.daumo.dynamicis.navigation.IslandPluginSettings.routeWithArgs) _root_ide_package_.com.daumo.dynamicis.navigation.IslandPluginSettings else _root_ide_package_.com.daumo.dynamicis.navigation.IslandHome
-									) as com.daumo.dynamicis.navigation.IslandDestination
+							(settings.find { (it as IslandDestination).route == currentDestination?.route }
+								?: if (currentDestination?.route == IslandPluginSettings.routeWithArgs) IslandPluginSettings else IslandHome
+									) as IslandDestination
 
 					// Top app bar
 					val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -153,7 +154,7 @@ class MainActivity : ComponentActivity() {
 								navigationIcon = {
 									if (
 										currentDestination?.route in settingsRoutes
-										|| currentDestination?.route == _root_ide_package_.com.daumo.dynamicis.navigation.IslandPluginSettings.routeWithArgs
+										|| currentDestination?.route == IslandPluginSettings.routeWithArgs
 									) {
 										IconButton(onClick = { navController.popBackStack() }) {
 											Icon(
@@ -171,14 +172,14 @@ class MainActivity : ComponentActivity() {
 						},
 						bottomBar = {
 							NavigationBar {
-								for (destination in _root_ide_package_.com.daumo.dynamicis.navigation.bottomDestinations) {
+								for (destination in bottomDestinations) {
 									NavigationBarItem(
 										icon = { Icon(destination.icon, contentDescription = null) },
 										label = { Text(destination.title) },
 										selected = currentScreen == destination
-												|| (destination == _root_ide_package_.com.daumo.dynamicis.navigation.IslandSettings && _root_ide_package_.com.daumo.dynamicis.ui.settings.settings.contains(
+												|| (destination == IslandSettings && settings.contains(
 											currentScreen))
-												|| (destination == _root_ide_package_.com.daumo.dynamicis.navigation.IslandPlugins && currentScreen == _root_ide_package_.com.daumo.dynamicis.navigation.IslandPluginSettings),
+												|| (destination == IslandPlugins && currentScreen == IslandPluginSettings),
 										onClick = {
 											navController.navigateSingleTopTo(destination.route)
 										}
@@ -187,7 +188,7 @@ class MainActivity : ComponentActivity() {
 							}
 						},
 					) {
-						_root_ide_package_.com.daumo.dynamicis.navigation.IslandNavHost(
+						IslandNavHost(
 							modifier = Modifier
 								.padding(it)
 								.fillMaxSize(),
@@ -202,28 +203,28 @@ class MainActivity : ComponentActivity() {
 	override fun onDestroy() {
 		super.onDestroy()
 		// Un-invert theme in app
-		settingsPreferences.edit().putBoolean(_root_ide_package_.com.daumo.dynamicis.model.THEME_INVERTED, false).apply()
-		sendBroadcast(Intent(_root_ide_package_.com.daumo.dynamicis.model.SETTINGS_THEME_INVERTED))
+		settingsPreferences.edit { putBoolean(THEME_INVERTED, false) }
+		sendBroadcast(Intent(SETTINGS_THEME_INVERTED))
 	}
 
 	override fun onStop() {
 		super.onStop()
 		// Un-invert theme in app
-		settingsPreferences.edit().putBoolean(_root_ide_package_.com.daumo.dynamicis.model.THEME_INVERTED, false).apply()
-		sendBroadcast(Intent(_root_ide_package_.com.daumo.dynamicis.model.SETTINGS_THEME_INVERTED))
+		settingsPreferences.edit { putBoolean(THEME_INVERTED, false) }
+		sendBroadcast(Intent(SETTINGS_THEME_INVERTED))
 	}
 
 	override fun onPause() {
 		super.onPause()
 		// Un-invert theme in app
-		settingsPreferences.edit().putBoolean(_root_ide_package_.com.daumo.dynamicis.model.THEME_INVERTED, false).apply()
-		sendBroadcast(Intent(_root_ide_package_.com.daumo.dynamicis.model.SETTINGS_THEME_INVERTED))
+		settingsPreferences.edit { putBoolean(THEME_INVERTED, false) }
+		sendBroadcast(Intent(SETTINGS_THEME_INVERTED))
 	}
 
 	override fun onResume() {
 		super.onResume()
 		// Invert theme in app
-		settingsPreferences.edit().putBoolean(_root_ide_package_.com.daumo.dynamicis.model.THEME_INVERTED, true).apply()
-		sendBroadcast(Intent(_root_ide_package_.com.daumo.dynamicis.model.SETTINGS_THEME_INVERTED))
+		settingsPreferences.edit { putBoolean(THEME_INVERTED, true) }
+		sendBroadcast(Intent(SETTINGS_THEME_INVERTED))
 	}
 }

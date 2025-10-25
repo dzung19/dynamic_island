@@ -92,23 +92,23 @@ class NotificationPlugin(
 	override val permissions: ArrayList<String> = arrayListOf(
 		Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS
 	),
-	override var pluginSettings: MutableMap<String, com.daumo.dynamicis.plugins.PluginSettingsItem> = mutableMapOf(),
-) : com.daumo.dynamicis.plugins.BasePlugin() {
+	override var pluginSettings: MutableMap<String, PluginSettingsItem> = mutableMapOf(),
+) : BasePlugin() {
 
-	private lateinit var context: com.daumo.dynamicis.model.service.IslandOverlayService
-	private val notificationService = _root_ide_package_.com.daumo.dynamicis.model.service.NotificationService.Companion.getInstance()
+	private lateinit var context: IslandOverlayService
+	private val notificationService = NotificationService.Companion.getInstance()
 
 	private var notificationMeta : MutableState<NotificationMeta?> = mutableStateOf(null)
 
 	private val handler = Handler(Looper.getMainLooper())
 
-	private val mBroadcastReceiver: BroadcastReceiver = object : android.content.BroadcastReceiver() {
+	private val mBroadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
 		@SuppressLint("NewApi")
         override fun onReceive(context: Context, intent: Intent) {
 
 			val extras : Bundle = intent.extras ?: return
 
-			if (intent.action == _root_ide_package_.com.daumo.dynamicis.model.NOTIFICATION_POSTED) {
+			if (intent.action == NOTIFICATION_POSTED) {
 
 				// Add notification to list
 				val notification = notificationService?.notifications?.lastOrNull { it.id == extras.getInt("id") } ?: return
@@ -138,7 +138,7 @@ class NotificationPlugin(
 				Log.d("NotificationPlugin", "BroadcastReceiver: Add plugin")
 				this@NotificationPlugin.context.addPlugin(this@NotificationPlugin)
 			}
-			if (intent.action == _root_ide_package_.com.daumo.dynamicis.model.NOTIFICATION_REMOVED) {
+			if (intent.action == NOTIFICATION_REMOVED) {
 				// val id = extras.getInt("id")
 				// removeNotificationAndUpdateState(id, true) // Notification already removed
 				Log.d("NotificationPlugin", "id: $id")
@@ -187,12 +187,12 @@ class NotificationPlugin(
 	override fun canExpand(): Boolean { return true }
 
 	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    override fun onCreate(context: com.daumo.dynamicis.model.service.IslandOverlayService?) {
+    override fun onCreate(context: IslandOverlayService?) {
 		this.context = context ?: return
 		Log.d(id, "onCreate")
 		val filter = IntentFilter()
-		filter.addAction(_root_ide_package_.com.daumo.dynamicis.model.NOTIFICATION_POSTED)
-		filter.addAction(_root_ide_package_.com.daumo.dynamicis.model.NOTIFICATION_REMOVED)
+		filter.addAction(NOTIFICATION_POSTED)
+		filter.addAction(NOTIFICATION_REMOVED)
 		context.registerReceiver(mBroadcastReceiver, filter, Context.RECEIVER_EXPORTED)
 	}
 
@@ -207,7 +207,7 @@ class NotificationPlugin(
 		val dismissState = rememberDismissState(
 			confirmStateChange = {
 				if (it == DismissValue.DismissedToStart || it == DismissValue.DismissedToEnd) {
-					context.sendBroadcast(Intent(_root_ide_package_.com.daumo.dynamicis.model.ACTION_CLOSE))
+					context.sendBroadcast(Intent(ACTION_CLOSE))
 					onLeftSwipe()
 				}
 				true
@@ -340,7 +340,7 @@ class NotificationPlugin(
 										intent.send()
 										// Remove notification
 										context.sendBroadcast(Intent(
-                                            _root_ide_package_.com.daumo.dynamicis.model.ACTION_CLOSE).apply {
+                                            ACTION_CLOSE).apply {
 											putExtra("id", meta.id)
 										})
 									},
@@ -415,7 +415,7 @@ class NotificationPlugin(
 									action.actionIntent.send(context, 0, intent)
 									// Remove notification
 									context.sendBroadcast(Intent(
-                                        _root_ide_package_.com.daumo.dynamicis.model.ACTION_CLOSE).apply {
+                                        ACTION_CLOSE).apply {
 										putExtra("id", meta.id)
 									})
 								}) {
@@ -439,7 +439,7 @@ class NotificationPlugin(
 
 	override fun onClick() {
 		val meta = notificationMeta.value ?: return
-		val intent = Intent(_root_ide_package_.com.daumo.dynamicis.model.ACTION_OPEN_CLOSE)
+		val intent = Intent(ACTION_OPEN_CLOSE)
 		intent.putExtra("id", meta.id)
 		context.sendBroadcast(intent)
 		val packageManager = context.packageManager
@@ -500,7 +500,7 @@ class NotificationPlugin(
 	@SuppressLint("NewApi")
     override fun onLeftSwipe() {
 		Log.d("Notification", "Left swipe")
-		context.sendBroadcast(Intent(_root_ide_package_.com.daumo.dynamicis.model.ACTION_CLOSE))
+		context.sendBroadcast(Intent(ACTION_CLOSE))
 		context.removePlugin(this)
 	}
 
@@ -513,6 +513,6 @@ class NotificationPlugin(
 				removeNotificationAndUpdateState(notificationMeta.value!!.id)
 				Log.d("NotificationPlugin", "Timeout: Remove notification")
 			}
-		}, _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.autoHideOpenedAfter.toLong())
+		}, IslandSettings.Companion.instance.autoHideOpenedAfter.toLong())
 	}
 }

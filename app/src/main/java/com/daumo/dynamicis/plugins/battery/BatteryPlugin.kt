@@ -37,20 +37,20 @@ class BatteryPlugin(
 	override val description: String = "Show the current battery level when charging",
 	override val permissions: ArrayList<String> = arrayListOf(),
 	override var enabled: MutableState<Boolean> = mutableStateOf(false),
-	override var pluginSettings: MutableMap<String, com.daumo.dynamicis.plugins.PluginSettingsItem> = mutableMapOf(
-		_root_ide_package_.com.daumo.dynamicis.model.BATTERY_SHOW_PERCENTAGE to _root_ide_package_.com.daumo.dynamicis.plugins.PluginSettingsItem.SwitchSettingsItem(
+	override var pluginSettings: MutableMap<String, PluginSettingsItem> = mutableMapOf(
+		BATTERY_SHOW_PERCENTAGE to PluginSettingsItem.SwitchSettingsItem(
 			title = "Show percentage",
 			description = "Show the battery percentage",
-			id = _root_ide_package_.com.daumo.dynamicis.model.BATTERY_SHOW_PERCENTAGE,
+			id = BATTERY_SHOW_PERCENTAGE,
 			value = mutableStateOf(true),
 		),
 	),
-) : com.daumo.dynamicis.plugins.BasePlugin() {
+) : BasePlugin() {
 
-	private lateinit var context: com.daumo.dynamicis.model.service.IslandOverlayService
-	var batteryPercent by mutableStateOf(0)
+	private lateinit var context: IslandOverlayService
+	var batteryPercent by mutableIntStateOf(0)
 
-	private val mBroadcastReceiver: BroadcastReceiver = object : android.content.BroadcastReceiver() {
+	private val mBroadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
 		override fun onReceive(context: Context, intent: Intent) {
 			// Get battery status extra
 			val status = intent.extras!!.getInt(BatteryManager.EXTRA_STATUS)
@@ -71,13 +71,13 @@ class BatteryPlugin(
 
 	override fun canExpand(): Boolean { return false } // TODO: Add expandable function
 
-	override fun onCreate(context: com.daumo.dynamicis.model.service.IslandOverlayService?) {
+	override fun onCreate(context: IslandOverlayService?) {
 		this.context = context ?: return
 		context.registerReceiver(mBroadcastReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
 
 		// Check for plugin internal settings
 		pluginSettings.values.forEach {
-			if (it is com.daumo.dynamicis.plugins.PluginSettingsItem.SwitchSettingsItem) {
+			if (it is PluginSettingsItem.SwitchSettingsItem) {
 				it.value.value = it.isSettingEnabled(context, it.id)
 			}
 		}
@@ -125,11 +125,11 @@ class BatteryPlugin(
 		WaveLoading(
 			progress = animateFloatAsState(targetValue = batteryPercent.toFloat() / 100).value,
 			foreDrawType = DrawType.DrawColor(pointBetweenColors(
-                _root_ide_package_.com.daumo.dynamicis.ui.theme.BatteryEmpty,
-                _root_ide_package_.com.daumo.dynamicis.ui.theme.BatteryFull, batteryPercent.toFloat() / 100)),
+                BatteryEmpty,
+                BatteryFull, batteryPercent.toFloat() / 100)),
 			backDrawType = DrawType.DrawColor(pointBetweenColors(pointBetweenColors(
-                _root_ide_package_.com.daumo.dynamicis.ui.theme.BatteryEmpty,
-                _root_ide_package_.com.daumo.dynamicis.ui.theme.BatteryFull, batteryPercent.toFloat() / 100), MaterialTheme.colorScheme.surface, .75f)),
+                BatteryEmpty,
+                BatteryFull, batteryPercent.toFloat() / 100), MaterialTheme.colorScheme.surface, .75f)),
 			modifier = Modifier
 				.fillMaxHeight()
 				.aspectRatio(1f)
@@ -148,7 +148,7 @@ class BatteryPlugin(
 
 	@Composable
 	override fun RightOpenedComposable() {
-		if ((pluginSettings[_root_ide_package_.com.daumo.dynamicis.model.BATTERY_SHOW_PERCENTAGE] as com.daumo.dynamicis.plugins.PluginSettingsItem.SwitchSettingsItem).value.value) {
+		if ((pluginSettings[BATTERY_SHOW_PERCENTAGE] as PluginSettingsItem.SwitchSettingsItem).value.value) {
 			Text(
 				text = "$batteryPercent%",
 				modifier = Modifier.padding(end = 4.dp),

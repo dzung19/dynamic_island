@@ -37,7 +37,7 @@ class NotificationService : android.service.notification.NotificationListenerSer
 			Log.d("NotificationService", "onReceive: ${statusBarNotification.id}, ${statusBarNotification.id}, ${statusBarNotification.notification.actions?.size}")
 			val notification = statusBarNotification.notification
 
-			if (intent.action == _root_ide_package_.com.daumo.dynamicis.model.ACTION_OPEN_CLOSE) {
+			if (intent.action == ACTION_OPEN_CLOSE) {
 				// Logic to remove notification
 				if (notification.deleteIntent != null) {
 					// Delete notification
@@ -50,7 +50,7 @@ class NotificationService : android.service.notification.NotificationListenerSer
 				// Start content intent from notification
 				notification.contentIntent.send()
 			}
-			if (intent.action == _root_ide_package_.com.daumo.dynamicis.model.ACTION_CLOSE) {
+			if (intent.action == ACTION_CLOSE) {
 				// Logic to remove notification
 				if (notification.deleteIntent != null) {
 					notification.deleteIntent.send()
@@ -69,8 +69,8 @@ class NotificationService : android.service.notification.NotificationListenerSer
 
 		// Register broadcast receiver
 		registerReceiver(mBroadcastReceiver, IntentFilter().apply {
-			addAction(_root_ide_package_.com.daumo.dynamicis.model.ACTION_OPEN_CLOSE)
-			addAction(_root_ide_package_.com.daumo.dynamicis.model.ACTION_CLOSE)
+			addAction(ACTION_OPEN_CLOSE)
+			addAction(ACTION_CLOSE)
 		}, RECEIVER_NOT_EXPORTED)
 	}
 
@@ -80,7 +80,7 @@ class NotificationService : android.service.notification.NotificationListenerSer
 		val notification = statusBarNotification.notification
 
 		// Check if notification is in the enabled apps list
-		if ((statusBarNotification.packageName !in _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.enabledApps) && !_root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.enabledApps.isEmpty()) return
+		if ((statusBarNotification.packageName !in IslandSettings.Companion.instance.enabledApps) && !IslandSettings.Companion.instance.enabledApps.isEmpty()) return
 
 		Log.d("NotificationService", "Notification Category: ${notification.category}")
 		// Ignore notifications from ->
@@ -96,7 +96,7 @@ class NotificationService : android.service.notification.NotificationListenerSer
 		Log.d("NotificationService", "Posted: $notifications")
 		Log.d("NotificationService", "Posted: ${notifications.size}")
 
-		sendBroadcast(Intent(_root_ide_package_.com.daumo.dynamicis.model.NOTIFICATION_POSTED).apply {
+		sendBroadcast(Intent(NOTIFICATION_POSTED).apply {
 			putExtra("id", statusBarNotification.id)
 			putExtra("package_name", statusBarNotification.packageName)
 			putExtra("category", notification.category)
@@ -119,7 +119,7 @@ class NotificationService : android.service.notification.NotificationListenerSer
 		Log.d("NotificationService", "Latest notification: ${notifications.firstOrNull()}")
 
 		// Send broadcast
-		sendBroadcast(Intent(_root_ide_package_.com.daumo.dynamicis.model.NOTIFICATION_REMOVED).apply {
+		sendBroadcast(Intent(NOTIFICATION_REMOVED).apply {
 			putExtra("id", statusBarNotification.id)
 		})
 	}

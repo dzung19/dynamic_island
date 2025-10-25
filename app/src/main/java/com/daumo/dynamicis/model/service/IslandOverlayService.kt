@@ -51,13 +51,13 @@ class IslandOverlayService : AccessibilityService() {
 	private lateinit var settingsPreferences: SharedPreferences
 
 	// State of the overlay
-	var islandState : com.daumo.dynamicis.island.IslandState by mutableStateOf(
-        _root_ide_package_.com.daumo.dynamicis.island.IslandViewState.Closed)
+	var islandState : IslandState by mutableStateOf(
+        IslandViewState.Closed)
 		private set
 
 	// Plugins
-	private val plugins: ArrayList<com.daumo.dynamicis.plugins.BasePlugin> = _root_ide_package_.com.daumo.dynamicis.plugins.ExportedPlugins.Companion.plugins
-	val bindedPlugins = mutableStateListOf<com.daumo.dynamicis.plugins.BasePlugin>()
+	private val plugins: ArrayList<BasePlugin> = ExportedPlugins.Companion.plugins
+	val bindedPlugins = mutableStateListOf<BasePlugin>()
 
 	// Theme
 	var invertedTheme by mutableStateOf(false)
@@ -70,23 +70,23 @@ class IslandOverlayService : AccessibilityService() {
 		}
 	}
 
-	private val mBroadcastReceiver: BroadcastReceiver = object : android.content.BroadcastReceiver() {
+	private val mBroadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
 		override fun onReceive(context: Context, intent: Intent) {
 			when (intent.action) {
-				_root_ide_package_.com.daumo.dynamicis.model.SETTINGS_CHANGED -> {
+				SETTINGS_CHANGED -> {
 					init()
 				}
-				_root_ide_package_.com.daumo.dynamicis.model.SETTINGS_THEME_INVERTED -> {
+				SETTINGS_THEME_INVERTED -> {
 					val settingsPreferences = getSharedPreferences(
-                        _root_ide_package_.com.daumo.dynamicis.model.SETTINGS_KEY, Context.MODE_PRIVATE)
+                        SETTINGS_KEY, Context.MODE_PRIVATE)
 					invertedTheme = settingsPreferences.getBoolean(
-                        _root_ide_package_.com.daumo.dynamicis.model.THEME_INVERTED, false)
+                        THEME_INVERTED, false)
 				}
 				ACTION_SCREEN_ON -> {
-					_root_ide_package_.com.daumo.dynamicis.island.Island.isScreenOn = true
+					Island.isScreenOn = true
 				}
 				ACTION_SCREEN_OFF -> {
-					_root_ide_package_.com.daumo.dynamicis.island.Island.isScreenOn = false
+					Island.isScreenOn = false
 				}
 			}
 		}
@@ -97,18 +97,18 @@ class IslandOverlayService : AccessibilityService() {
 		super.onServiceConnected()
 		setTheme(R.style.Theme_DynamicIsland)
 		instance = this
-		settingsPreferences = getSharedPreferences(_root_ide_package_.com.daumo.dynamicis.model.SETTINGS_KEY, Context.MODE_PRIVATE)
+		settingsPreferences = getSharedPreferences(SETTINGS_KEY, Context.MODE_PRIVATE)
 
 		// Register broadcast receiver
 		registerReceiver(mBroadcastReceiver, IntentFilter().apply {
-			addAction(_root_ide_package_.com.daumo.dynamicis.model.SETTINGS_CHANGED)
-			addAction(_root_ide_package_.com.daumo.dynamicis.model.SETTINGS_THEME_INVERTED)
+			addAction(SETTINGS_CHANGED)
+			addAction(SETTINGS_THEME_INVERTED)
 			addAction(ACTION_SCREEN_ON)
 			addAction(ACTION_SCREEN_OFF)
 		}, RECEIVER_NOT_EXPORTED)
 
 		// Setup plugins (check if they are enabled)
-		_root_ide_package_.com.daumo.dynamicis.plugins.ExportedPlugins.Companion.setupPlugins(context = this)
+		ExportedPlugins.Companion.setupPlugins(context = this)
 
 		// Setup
 		init()
@@ -129,7 +129,7 @@ class IslandOverlayService : AccessibilityService() {
 		}
 
 		// Reset island state
-		islandState = _root_ide_package_.com.daumo.dynamicis.island.IslandViewState.Closed
+		islandState = IslandViewState.Closed
 
 		// Initialize the plugins
 		plugins.forEach {
@@ -139,8 +139,8 @@ class IslandOverlayService : AccessibilityService() {
 		}
 
 		// Setup inverted theme
-		val settingsPreferences = getSharedPreferences(_root_ide_package_.com.daumo.dynamicis.model.SETTINGS_KEY, Context.MODE_PRIVATE)
-		invertedTheme = settingsPreferences.getBoolean(_root_ide_package_.com.daumo.dynamicis.model.THEME_INVERTED, false)
+		val settingsPreferences = getSharedPreferences(SETTINGS_KEY, Context.MODE_PRIVATE)
+		invertedTheme = settingsPreferences.getBoolean(THEME_INVERTED, false)
 	}
 
 	@RequiresApi(Build.VERSION_CODES.S)
@@ -157,13 +157,13 @@ class IslandOverlayService : AccessibilityService() {
 			// Listen for plugin changes
 			LaunchedEffect(bindedPlugins.firstOrNull()) {
 				islandState = if (bindedPlugins.firstOrNull() != null) {
-					_root_ide_package_.com.daumo.dynamicis.island.IslandViewState.Opened
+					IslandViewState.Opened
 				} else {
-					_root_ide_package_.com.daumo.dynamicis.island.IslandViewState.Closed
+					IslandViewState.Closed
 				}
 			}
 
-            _root_ide_package_.com.daumo.dynamicis.ui.island.IslandApp(
+            IslandApp(
                 islandOverlayService = this,
             )
 		}
@@ -191,7 +191,7 @@ class IslandOverlayService : AccessibilityService() {
 				get() = viewModelStore
 		}
 
-		val lifecycleOwner = _root_ide_package_.com.daumo.dynamicis.model.MyLifecycleOwner()
+		val lifecycleOwner = MyLifecycleOwner()
 		lifecycleOwner.performRestore(null)
 		lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
 		composeView.setViewTreeLifecycleOwner(lifecycleOwner)
@@ -211,7 +211,7 @@ class IslandOverlayService : AccessibilityService() {
 		windowManager.addView(composeView, params)
 	}
 
-	fun addPlugin(plugin: com.daumo.dynamicis.plugins.BasePlugin) {
+	fun addPlugin(plugin: BasePlugin) {
 		// Check for existing plugin with same id
 		if (bindedPlugins.any { it.id == plugin.id }) {
 			Log.d("OverlayService", "Plugin with id ${plugin.id} already binded")
@@ -226,13 +226,13 @@ class IslandOverlayService : AccessibilityService() {
 		}
 	}
 	@RequiresApi(Build.VERSION_CODES.N)
-    fun removePlugin(plugin: com.daumo.dynamicis.plugins.BasePlugin) {
+    fun removePlugin(plugin: BasePlugin) {
 		Log.d("OverlayService", "Plugin with id ${plugin.id} removed")
 		bindedPlugins.removeIf { it.id == plugin.id }
 	}
 
-	fun expand() { islandState = _root_ide_package_.com.daumo.dynamicis.island.IslandViewState.Expanded(configuration = resources.configuration) }
-	fun shrink() { islandState = _root_ide_package_.com.daumo.dynamicis.island.IslandViewState.Opened }
+	fun expand() { islandState = IslandViewState.Expanded(configuration = resources.configuration) }
+	fun shrink() { islandState = IslandViewState.Opened }
 
 	override fun onUnbind(intent: Intent?): Boolean {
 		instance = null
@@ -246,7 +246,7 @@ class IslandOverlayService : AccessibilityService() {
 
 	override fun onConfigurationChanged(newConfig: Configuration) {
 		super.onConfigurationChanged(newConfig)
-		_root_ide_package_.com.daumo.dynamicis.island.Island.isInLandscape = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE
+		Island.isInLandscape = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE
 	}
 
 	override fun onAccessibilityEvent(event: AccessibilityEvent?) {}

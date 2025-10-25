@@ -36,10 +36,10 @@ class DisclosureActivity : ComponentActivity() {
 
 		setContent {
 
-			_root_ide_package_.com.daumo.dynamicis.ui.theme.Theme.Companion.instance.Init()
+			Theme.Companion.instance.Init()
 			WindowCompat.setDecorFitsSystemWindows(window, false)
 
-			settingsPreferences = getSharedPreferences(_root_ide_package_.com.daumo.dynamicis.model.SETTINGS_KEY, Context.MODE_PRIVATE)
+			settingsPreferences = getSharedPreferences(SETTINGS_KEY, Context.MODE_PRIVATE)
 
 			// Top app bar
 			val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -96,8 +96,8 @@ class DisclosureActivity : ComponentActivity() {
 			)
 			var step by remember { mutableStateOf(0) }
 
-            _root_ide_package_.com.daumo.dynamicis.ui.theme.DynamicIslandTheme(
-                darkTheme = _root_ide_package_.com.daumo.dynamicis.ui.theme.Theme.Companion.instance.isDarkTheme,
+            DynamicIslandTheme(
+                darkTheme = Theme.Companion.instance.isDarkTheme,
             ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -125,7 +125,7 @@ class DisclosureActivity : ComponentActivity() {
                             onPrevious = { step-- },
                             onStart = {
                                 settingsPreferences.edit()
-                                    .putBoolean(_root_ide_package_.com.daumo.dynamicis.model.DISCLOSURE_ACCEPTED, true)
+                                    .putBoolean(DISCLOSURE_ACCEPTED, true)
                                     .apply()
                                 startActivity(Intent(this, MainActivity::class.java))
                                 finish()

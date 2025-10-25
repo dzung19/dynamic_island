@@ -8,6 +8,7 @@ import androidx.compose.runtime.MutableState
 import com.daumo.dynamicis.model.SETTINGS_CHANGED
 import com.daumo.dynamicis.model.SETTINGS_KEY
 import com.daumo.dynamicis.model.service.IslandOverlayService
+import androidx.core.content.edit
 
 abstract class BasePlugin {
 	abstract val id: String
@@ -43,11 +44,11 @@ abstract class BasePlugin {
 		return if (allPermissionsGranted || !enabled) {
 			// If all permissions are granted, we can enable the plugin
 			// Save value in settings preferences
-			val editor = context.getSharedPreferences(_root_ide_package_.com.daumo.dynamicis.model.SETTINGS_KEY, Context.MODE_PRIVATE).edit()
-			editor.putBoolean(id, enabled)
-			editor.apply()
+            context.getSharedPreferences(SETTINGS_KEY, Context.MODE_PRIVATE).edit {
+                putBoolean(id, enabled)
+            }
 
-			context.sendBroadcast(Intent(_root_ide_package_.com.daumo.dynamicis.model.SETTINGS_CHANGED))
+			context.sendBroadcast(Intent(SETTINGS_CHANGED))
 			this.enabled.value = enabled
 
 			true
@@ -64,7 +65,7 @@ abstract class BasePlugin {
 		}
 
 	fun isPluginEnabled(context: Context): Boolean {
-		val preferences = context.getSharedPreferences(_root_ide_package_.com.daumo.dynamicis.model.SETTINGS_KEY, Context.MODE_PRIVATE)
+		val preferences = context.getSharedPreferences(SETTINGS_KEY, Context.MODE_PRIVATE)
 		Log.d("BasePlugin", "isPluginEnabled: ${preferences.getBoolean(id, false)}")
 		return preferences.getBoolean(id, false)
 	}

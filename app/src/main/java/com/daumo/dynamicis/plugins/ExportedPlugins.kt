@@ -22,15 +22,15 @@ class ExportedPlugins {
 			) { override fun checkPermission(context: Context) : Boolean {
 					val contentResolver = context.contentResolver
 					val enabledNotificationListeners = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
-					val packageName = _root_ide_package_.com.daumo.dynamicis.model.packageName
+					val packageName = packageName
 					return enabledNotificationListeners != null && enabledNotificationListeners.contains(packageName)
 				} }
 		)
 
 		val plugins = arrayListOf(
-            _root_ide_package_.com.daumo.dynamicis.plugins.notification.NotificationPlugin(),
-            _root_ide_package_.com.daumo.dynamicis.plugins.media.MediaSessionPlugin(),
-            _root_ide_package_.com.daumo.dynamicis.plugins.battery.BatteryPlugin(),
+            NotificationPlugin(),
+            MediaSessionPlugin(),
+            BatteryPlugin(),
 		)
 
 		fun setupPlugins(context: Context) {
