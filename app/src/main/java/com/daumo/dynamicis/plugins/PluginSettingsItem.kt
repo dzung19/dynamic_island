@@ -1,0 +1,31 @@
+package com.daumo.dynamicis.plugins
+
+import android.content.Context
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import com.daumo.dynamicis.model.PLUGIN_SETTINGS_KEY
+
+sealed class PluginSettingsItem {
+	abstract val title: String
+	abstract val description: String
+
+	class SwitchSettingsItem(
+		override val title: String,
+		override val description: String,
+		var id: String,
+		var value: MutableState<Boolean> = mutableStateOf(false),
+		val onValueChange: (Context, Boolean) -> Unit = { context, enabled ->
+			val editor = context.getSharedPreferences(_root_ide_package_.com.daumo.dynamicis.model.PLUGIN_SETTINGS_KEY, Context.MODE_PRIVATE).edit()
+			editor.putBoolean(id, enabled)
+			editor.apply()
+
+			value.value = enabled
+		},
+	) : PluginSettingsItem() {
+		fun isSettingEnabled(context: Context, id: String): Boolean {
+			val preferences = context.getSharedPreferences(
+                _root_ide_package_.com.daumo.dynamicis.model.PLUGIN_SETTINGS_KEY, Context.MODE_PRIVATE)
+			return preferences.getBoolean(id, value.value)
+		}
+	}
+}
