@@ -13,31 +13,31 @@ interface SettingItem {
 	val route: String
 }
 
-object ThemeSetting : com.daumo.dynamicis.navigation.IslandDestination, SettingItem {
+object ThemeSetting : IslandDestination, SettingItem {
 	override val title: String = "Theme"
 	override val subtitle: String = "Change the theme of the app"
 	override val icon: ImageVector = Icons.Default.DarkMode
 	override val route: String = "theme"
 }
-object PositionSizeSetting : com.daumo.dynamicis.navigation.IslandDestination, SettingItem {
+object PositionSizeSetting : IslandDestination, SettingItem {
 	override val title: String = "Position & Size"
 	override val subtitle: String = "Change the position and size of the island"
 	override val icon: ImageVector = Icons.Default.Straighten
 	override val route: String = "position_size"
 }
-object EnabledAppsSetting : com.daumo.dynamicis.navigation.IslandDestination, SettingItem {
+object EnabledAppsSetting : IslandDestination, SettingItem {
 	override val title: String = "Enabled Apps"
 	override val subtitle: String = "Change the apps that dynamically appear on the island"
 	override val icon: ImageVector = Icons.Default.Apps
 	override val route: String = "enabled_apps"
 }
-object BehaviorSetting : com.daumo.dynamicis.navigation.IslandDestination, SettingItem {
+object BehaviorSetting : IslandDestination, SettingItem {
 	override val title: String = "Behavior"
 	override val subtitle: String = "Change the behavior of the island"
 	override val icon: ImageVector = Icons.Default.Token
 	override val route: String = "behavior"
 }
-object AboutSetting : com.daumo.dynamicis.navigation.IslandDestination, SettingItem {
+object AboutSetting : IslandDestination, SettingItem {
 	override val title: String = "About"
 	override val subtitle: String = "About the app"
 	override val icon: ImageVector = Icons.Default.Info

@@ -1,5 +1,6 @@
 package com.daumo.dynamicis.ui.settings.pages
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.animation.*
 import androidx.compose.animation.core.animateFloatAsState
@@ -26,7 +27,9 @@ import com.daumo.dynamicis.island.IslandViewState
 import com.daumo.dynamicis.ui.settings.SettingsDivider
 import java.math.RoundingMode
 import kotlin.math.roundToInt
+import androidx.core.content.edit
 
+@SuppressLint("ConfigurationScreenWidthHeight")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PositionSizeSettingsScreen() {
@@ -34,12 +37,12 @@ fun PositionSizeSettingsScreen() {
     val context = LocalContext.current
 
     // Shared Preferences
-    val settingsPreferences = context.getSharedPreferences(_root_ide_package_.com.daumo.dynamicis.model.SETTINGS_KEY, Context.MODE_PRIVATE)
+    val settingsPreferences = context.getSharedPreferences(SETTINGS_KEY, Context.MODE_PRIVATE)
 
     val (gravitySelectedOption, onGravityOptionSelected) = remember {
         mutableStateOf(
             settingsPreferences.getString(
-                _root_ide_package_.com.daumo.dynamicis.model.GRAVITY, _root_ide_package_.com.daumo.dynamicis.island.IslandGravity.Center.name)
+                GRAVITY, IslandGravity.Center.name)
         )
     }
 
@@ -48,8 +51,8 @@ fun PositionSizeSettingsScreen() {
         mutableStateOf(
             TextFieldValue(
                 settingsPreferences.getString(
-                    _root_ide_package_.com.daumo.dynamicis.model.GRAVITY,
-                    _root_ide_package_.com.daumo.dynamicis.island.IslandGravity.Center.name
+                    GRAVITY,
+                    IslandGravity.Center.name
                 ) ?: ""
             )
         )
@@ -90,7 +93,7 @@ fun PositionSizeSettingsScreen() {
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
                 ) {
-                    _root_ide_package_.com.daumo.dynamicis.island.IslandGravity.values().forEach { islandGravity ->
+                    IslandGravity.entries.forEach { islandGravity ->
                         DropdownMenuItem(
                             text = { Text(text = islandGravity.name) },
                             onClick = {
@@ -98,11 +101,11 @@ fun PositionSizeSettingsScreen() {
                                 expanded = false
 
                                 settingsPreferences
-                                    .edit()
-                                    .putString(_root_ide_package_.com.daumo.dynamicis.model.GRAVITY, islandGravity.name)
-                                    .apply()
-                                _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.gravity =
-                                    _root_ide_package_.com.daumo.dynamicis.island.IslandGravity.valueOf(islandGravity.name)
+                                    .edit {
+                                        putString(GRAVITY, islandGravity.name)
+                                    }
+                                IslandSettings.Companion.instance.gravity =
+                                    IslandGravity.valueOf(islandGravity.name)
                             },
                         )
                     }
@@ -110,55 +113,55 @@ fun PositionSizeSettingsScreen() {
             }
 
             SettingsSlider(
-                onValueChange = { _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.positionX = it.roundToInt() },
-                onReset = { _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.positionX = 0 },
+                onValueChange = { IslandSettings.Companion.instance.positionX = it.roundToInt() },
+                onReset = { IslandSettings.Companion.instance.positionX = 0 },
                 title = "Position X",
                 extension = ".dp",
-                value = _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.positionX.toFloat(),
+                value = IslandSettings.Companion.instance.positionX.toFloat(),
                 range = -LocalConfiguration.current.screenWidthDp.toFloat() / 2..LocalConfiguration.current.screenWidthDp.toFloat() / 2
             )
             SettingsSlider(
                 onValueChange = {
                     if (it.isNaN()) {
-                        _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.positionX = 0
+                        IslandSettings.Companion.instance.positionX = 0
                     } else {
-                        _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.positionX = it.roundToInt()
+                        IslandSettings.Companion.instance.positionX = it.roundToInt()
                     }
                 },
-                onReset = { _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.positionY = 5 },
+                onReset = { IslandSettings.Companion.instance.positionY = 5 },
                 title = "Position Y",
                 extension = ".dp",
-                value = _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.positionY.toFloat(),
+                value = IslandSettings.Companion.instance.positionY.toFloat(),
                 range = 0f..50f
             )
         }
         item {
             SettingsHeader(title = "Size")
             SettingsSlider(
-                onValueChange = { _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.width = it.roundToInt() },
-                onReset = { _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.width = 150 },
+                onValueChange = { IslandSettings.Companion.instance.width = it.roundToInt() },
+                onReset = { IslandSettings.Companion.instance.width = 150 },
                 title = "Width",
                 extension = ".dp",
-                value = _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.width.toFloat(),
-                range = _root_ide_package_.com.daumo.dynamicis.island.IslandViewState.Opened.height.value * 3..LocalConfiguration.current.screenWidthDp.toFloat() - _root_ide_package_.com.daumo.dynamicis.island.IslandViewState.Opened.yPosition.value * 2
+                value = IslandSettings.Companion.instance.width.toFloat(),
+                range = IslandViewState.Opened.height.value * 3..LocalConfiguration.current.screenWidthDp.toFloat() - IslandViewState.Opened.yPosition.value * 2
             )
             SettingsSlider(
-                onValueChange = { _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.height = it.roundToInt() },
-                onReset = { _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.height = 200 },
+                onValueChange = {IslandSettings.Companion.instance.height = it.roundToInt() },
+                onReset = {IslandSettings.Companion.instance.height = 200 },
                 title = "Height",
                 extension = ".dp",
-                value = _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.height.toFloat(),
+                value = IslandSettings.Companion.instance.height.toFloat(),
                 range = 1f..LocalConfiguration.current.screenHeightDp.toFloat() / 2
             )
         }
         item {
             SettingsHeader(title = "Corner")
             SettingsSlider(
-                onValueChange = { _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.cornerRadius = it.roundToInt() },
-                onReset = { _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.cornerRadius = 60 },
+                onValueChange = { IslandSettings.Companion.instance.cornerRadius = it.roundToInt() },
+                onReset = { IslandSettings.Companion.instance.cornerRadius = 60 },
                 title = "Corner radius",
                 extension = ".dp",
-                value = _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.cornerRadius.toFloat(),
+                value = IslandSettings.Companion.instance.cornerRadius.toFloat(),
                 range = 0f..100f
             )
         }
@@ -178,7 +181,7 @@ fun SettingsHeader(
             text = title,
             style = MaterialTheme.typography.titleSmall,
         )
-        _root_ide_package_.com.daumo.dynamicis.ui.settings.SettingsDivider(modifier = Modifier.padding(vertical = 8.dp))
+        SettingsDivider(modifier = Modifier.padding(vertical = 8.dp))
     }
 }
 
@@ -195,7 +198,7 @@ fun SettingsSlider(
     range: ClosedFloatingPointRange<Float>,
 ) {
     val context = LocalContext.current
-    val islandSettings = _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance
+    val islandSettings = IslandSettings.Companion.instance
 
     Column(
         modifier = Modifier
@@ -246,7 +249,7 @@ fun SettingsSlider(
             TextButton(
                 onClick = {
                     onReset()
-                    _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.applySettings(context)
+                    IslandSettings.Companion.instance.applySettings(context)
                 },
             ) {
                 Text(
@@ -259,7 +262,7 @@ fun SettingsSlider(
                 onClick = {
                     if (value > range.start) {
                         onValueChange(value - preciseValue)
-                        _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.applySettings(context)
+                        IslandSettings.Companion.instance.applySettings(context)
                     }
                 }
             ) {
@@ -284,7 +287,7 @@ fun SettingsSlider(
                 onClick = {
                     if (value < range.endInclusive) {
                         onValueChange(value + preciseValue)
-                        _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.applySettings(context)
+                        IslandSettings.Companion.instance.applySettings(context)
                     }
                 }
             ) {

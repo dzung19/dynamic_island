@@ -22,7 +22,7 @@ abstract class BasePlugin {
 
 	abstract fun canExpand(): Boolean
 
-	abstract fun onCreate(context: com.daumo.dynamicis.model.service.IslandOverlayService?)
+	abstract fun onCreate(context: IslandOverlayService?)
 	@Composable
 	abstract fun Composable()
 	abstract fun onClick()

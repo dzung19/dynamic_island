@@ -24,33 +24,33 @@ fun BehaviorSettingsScreen() {
             SwitchSettingsItem(
                 title = "Show on lock screen",
                 description = "Show the island on the lock screen and on the always-on display",
-                checked = _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.showOnLockScreen
-            ) { _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.showOnLockScreen = it }
+                checked = IslandSettings.Companion.instance.showOnLockScreen
+            ) { IslandSettings.Companion.instance.showOnLockScreen = it }
         }
         item {
             SwitchSettingsItem(
                 title = "Show in landscape",
                 description = "Show island in landscape mode",
-                checked = _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.showInLandscape
-            ) { _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.showInLandscape = it }
+                checked = IslandSettings.Companion.instance.showInLandscape
+            ) { IslandSettings.Companion.instance.showInLandscape = it }
         }
         item {
             Spacer(modifier = Modifier.height(16.dp))
             SettingsSlider(
                 onValueChange = {
                     if (it.isNaN())
-                        _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.autoHideOpenedAfter = 1000f
+                        IslandSettings.Companion.instance.autoHideOpenedAfter = 1000f
                     else
-                        _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.autoHideOpenedAfter = it * 1000
+                        IslandSettings.Companion.instance.autoHideOpenedAfter = it * 1000
                 },
                 onReset = {
-                    _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.autoHideOpenedAfter = 5000f
+                    IslandSettings.Companion.instance.autoHideOpenedAfter = 5000f
                 },
                 roundedTo = 1,
                 preciseValue = .5f,
                 title = "Auto hide opened island after",
                 extension = "s",
-                value = _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.autoHideOpenedAfter / 1000,
+                value = IslandSettings.Companion.instance.autoHideOpenedAfter / 1000,
                 range = 0.5f..60f,
             )
         }

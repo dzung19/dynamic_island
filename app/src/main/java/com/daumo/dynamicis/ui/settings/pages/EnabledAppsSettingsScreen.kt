@@ -45,23 +45,23 @@ fun EnabledAppsSettingsScreen() {
 	}
 
 	LaunchedEffect(Unit) {
-		_root_ide_package_.com.daumo.dynamicis.MainActivity.Companion.instance.actions.clear()
-		_root_ide_package_.com.daumo.dynamicis.MainActivity.Companion.instance.actions.add {
+		MainActivity.Companion.instance.actions.clear()
+		MainActivity.Companion.instance.actions.add {
 			IconButton(
 				onClick = {
-					if (apps.all { _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.enabledApps.contains(it.packageName) }) {
+					if (apps.all { IslandSettings.Companion.instance.enabledApps.contains(it.packageName) }) {
 						// Unselect all
-						_root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.enabledApps.clear()
-						_root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.applySettings(context)
+						IslandSettings.Companion.instance.enabledApps.clear()
+						IslandSettings.Companion.instance.applySettings(context)
 					} else {
 						// Select all
-						_root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.enabledApps.clear()
-						_root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.enabledApps.addAll(apps.map { it.packageName })
-						_root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.applySettings(context)
+						IslandSettings.Companion.instance.enabledApps.clear()
+						IslandSettings.Companion.instance.enabledApps.addAll(apps.map { it.packageName })
+						IslandSettings.Companion.instance.applySettings(context)
 					}
 				},
 			) {
-				Icon(if (apps.all { _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.enabledApps.contains(it.packageName) }) Icons.Filled.Deselect else Icons.Filled.SelectAll, contentDescription = null)
+				Icon(if (apps.all {IslandSettings.Companion.instance.enabledApps.contains(it.packageName) }) Icons.Filled.Deselect else Icons.Filled.SelectAll, contentDescription = null)
 			}
 		}
 	}
@@ -75,15 +75,15 @@ fun EnabledAppsSettingsScreen() {
 
 			EnabledAppCard(
 				app = app,
-				selected = _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.enabledApps.contains(app.packageName),
+				selected = IslandSettings.Companion.instance.enabledApps.contains(app.packageName),
 				onSwitch = { switch ->
 					if (switch) {
-						_root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.enabledApps.add(app.packageName)
+						IslandSettings.Companion.instance.enabledApps.add(app.packageName)
 					} else {
-						_root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.enabledApps.remove(app.packageName)
+						IslandSettings.Companion.instance.enabledApps.remove(app.packageName)
 					}
 					selected = switch
-					_root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.applySettings(context)
+					IslandSettings.Companion.instance.applySettings(context)
 				}
 			)
 		}

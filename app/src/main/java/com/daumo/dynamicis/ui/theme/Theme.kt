@@ -4,14 +4,9 @@ import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.MaterialTheme.colors
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
@@ -39,17 +34,17 @@ class Theme {
 			previewColorDark = null
 		),
 		Black(
-			darkScheme = _root_ide_package_.com.daumo.dynamicis.ui.theme.themes.BlackTheme,
+			darkScheme = BlackTheme,
 			styleName = "Black & White",
 			previewColorLight = Color.Black,
 			previewColorDark = Color.White
 		),
 		QuinacridoneMagenta(
-			lightScheme = _root_ide_package_.com.daumo.dynamicis.ui.theme.themes.QuinacridoneMagentaThemeLightColors,
-			darkScheme = _root_ide_package_.com.daumo.dynamicis.ui.theme.themes.QuinacridoneMagentaThemeDarkColors,
+			lightScheme = QuinacridoneMagentaThemeLightColors,
+			darkScheme = QuinacridoneMagentaThemeDarkColors,
 			styleName = "Quinacridone Magenta",
-			previewColorLight = _root_ide_package_.com.daumo.dynamicis.ui.theme.themes.QuinacridoneMagentaThemeLightColors.primary,
-			previewColorDark = _root_ide_package_.com.daumo.dynamicis.ui.theme.themes.QuinacridoneMagentaThemeDarkColors.primary
+			previewColorLight = QuinacridoneMagentaThemeLightColors.primary,
+			previewColorDark = QuinacridoneMagentaThemeDarkColors.primary
 		),
 	}
 
@@ -66,16 +61,16 @@ class Theme {
 	) {
 		val context = LocalContext.current
 		val settingsPreferences = context.getSharedPreferences(
-            _root_ide_package_.com.daumo.dynamicis.model.SETTINGS_KEY, Context.MODE_PRIVATE)
+            SETTINGS_KEY, Context.MODE_PRIVATE)
 
-		isDarkTheme = when (settingsPreferences.getString(_root_ide_package_.com.daumo.dynamicis.model.THEME, "System")) {
+		isDarkTheme = when (settingsPreferences.getString(THEME, "System")) {
 			"System" -> { isSystemInDarkTheme }
 			"Dark" -> { true }
 			"Light" -> { false }
 			else -> { isSystemInDarkTheme }
 		}
 
-		themeStyle = when (settingsPreferences.getString(_root_ide_package_.com.daumo.dynamicis.model.STYLE, "MaterialYou")) {
+		themeStyle = when (settingsPreferences.getString(STYLE, "MaterialYou")) {
 			ThemeStyle.MaterialYou.name -> { ThemeStyle.MaterialYou }
 			ThemeStyle.Black.name -> { ThemeStyle.Black }
 			ThemeStyle.QuinacridoneMagenta.name -> { ThemeStyle.QuinacridoneMagenta }

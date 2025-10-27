@@ -27,6 +27,7 @@ import com.daumo.dynamicis.island.IslandSettings
 import com.daumo.dynamicis.ui.settings.SettingsDivider
 import com.daumo.dynamicis.ui.settings.radioOptions
 import com.daumo.dynamicis.ui.theme.Theme
+import androidx.core.content.edit
 
 @Composable
 fun ThemeSettingsScreen() {
@@ -36,12 +37,12 @@ fun ThemeSettingsScreen() {
 	val isSystemInDarkTheme = isSystemInDarkTheme()
 
 	// Shared Preferences
-	val settingsPreferences = context.getSharedPreferences(_root_ide_package_.com.daumo.dynamicis.model.SETTINGS_KEY, Context.MODE_PRIVATE)
+	val settingsPreferences = context.getSharedPreferences(SETTINGS_KEY, Context.MODE_PRIVATE)
 
 	val (themeSelectedOption, onThemeOptionSelected) = remember { mutableStateOf(settingsPreferences.getString(
-        _root_ide_package_.com.daumo.dynamicis.model.THEME, "System")) }
+        THEME, "System")) }
 	val (styleSelectedOption, onStyleOptionSelected) = remember { mutableStateOf(
-        _root_ide_package_.com.daumo.dynamicis.ui.theme.Theme.Companion.instance.themeStyle) }
+        Theme.Companion.instance.themeStyle) }
 
 
 	Column(
@@ -53,10 +54,10 @@ fun ThemeSettingsScreen() {
 		SwitchSettingsItem(
 			title = "Show borders",
 			description = "Show borders around the island",
-			checked = _root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.showBorders
+			checked = IslandSettings.Companion.instance.showBorders
 		) {
-			_root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.showBorders = it
-			_root_ide_package_.com.daumo.dynamicis.island.IslandSettings.Companion.instance.applySettings(context)
+			IslandSettings.Companion.instance.showBorders = it
+			IslandSettings.Companion.instance.applySettings(context)
 		}
 		OutlinedCard(
 			modifier = Modifier
@@ -76,11 +77,11 @@ fun ThemeSettingsScreen() {
 						.fillMaxWidth(),
 					textAlign = TextAlign.Center,
 				)
-                _root_ide_package_.com.daumo.dynamicis.ui.settings.SettingsDivider(modifier = Modifier
+                SettingsDivider(modifier = Modifier
                     .padding(vertical = 8.dp)
                     .padding(horizontal = 16.dp))
 				Column(Modifier.selectableGroup()) {
-					_root_ide_package_.com.daumo.dynamicis.ui.settings.radioOptions.forEach { text ->
+					radioOptions.forEach { text ->
 						Row(
 							Modifier
 								.fillMaxWidth()
@@ -91,10 +92,10 @@ fun ThemeSettingsScreen() {
 									onClick = {
 										onThemeOptionSelected(text)
 										settingsPreferences
-											.edit()
-											.putString(_root_ide_package_.com.daumo.dynamicis.model.THEME, text)
-											.apply()
-										_root_ide_package_.com.daumo.dynamicis.ui.theme.Theme.Companion.instance.isDarkTheme = when (text) {
+											.edit {
+                                                putString(THEME, text)
+                                            }
+										Theme.Companion.instance.isDarkTheme = when (text) {
 											"System" -> {
 												isSystemInDarkTheme
 											}
@@ -146,11 +147,11 @@ fun ThemeSettingsScreen() {
 						.fillMaxWidth(),
 					textAlign = TextAlign.Center,
 				)
-                _root_ide_package_.com.daumo.dynamicis.ui.settings.SettingsDivider(modifier = Modifier
+                SettingsDivider(modifier = Modifier
                     .padding(vertical = 8.dp)
                     .padding(horizontal = 16.dp))
 				Column(Modifier.selectableGroup()) {
-					_root_ide_package_.com.daumo.dynamicis.ui.theme.Theme.ThemeStyle.entries.forEach { themeStyle ->
+					Theme.ThemeStyle.entries.forEach { themeStyle ->
 						Row(
 							Modifier
 								.fillMaxWidth()
@@ -160,11 +161,11 @@ fun ThemeSettingsScreen() {
 									selected = (themeStyle == styleSelectedOption),
 									onClick = {
 										onStyleOptionSelected(themeStyle)
-										_root_ide_package_.com.daumo.dynamicis.ui.theme.Theme.Companion.instance.themeStyle = themeStyle
+										Theme.Companion.instance.themeStyle = themeStyle
 										settingsPreferences
-											.edit()
-											.putString(_root_ide_package_.com.daumo.dynamicis.model.STYLE, themeStyle.name)
-											.apply()
+											.edit {
+                                                putString(STYLE, themeStyle.name)
+                                            }
 									},
 									role = Role.RadioButton
 								)
@@ -172,9 +173,9 @@ fun ThemeSettingsScreen() {
 							verticalAlignment = Alignment.CenterVertically
 						) {
 							val stylePreviewColor =
-								if (_root_ide_package_.com.daumo.dynamicis.ui.theme.Theme.Companion.instance.themeStyle.name != _root_ide_package_.com.daumo.dynamicis.ui.theme.Theme.ThemeStyle.MaterialYou.name) {
-									if (_root_ide_package_.com.daumo.dynamicis.ui.theme.Theme.Companion.instance.isDarkTheme) {
-										if (_root_ide_package_.com.daumo.dynamicis.ui.theme.Theme.Companion.instance.themeStyle.darkScheme != null) {
+								if (Theme.Companion.instance.themeStyle.name != Theme.ThemeStyle.MaterialYou.name) {
+									if (Theme.Companion.instance.isDarkTheme) {
+										if (Theme.Companion.instance.themeStyle.darkScheme != null) {
                                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                                                 themeStyle.previewColorDark ?: dynamicDarkColorScheme(context).primary
                                             } else {
@@ -188,7 +189,7 @@ fun ThemeSettingsScreen() {
 											}
                                         }
 									} else {
-										if (_root_ide_package_.com.daumo.dynamicis.ui.theme.Theme.Companion.instance.themeStyle.lightScheme != null) {
+										if (Theme.Companion.instance.themeStyle.lightScheme != null) {
                                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                                                 themeStyle.previewColorLight ?: dynamicLightColorScheme(context).primary
                                             } else {
@@ -203,7 +204,7 @@ fun ThemeSettingsScreen() {
                                         }
 									}
 								} else {
-									if (_root_ide_package_.com.daumo.dynamicis.ui.theme.Theme.Companion.instance.isDarkTheme) {
+									if (Theme.Companion.instance.isDarkTheme) {
                                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                                             themeStyle.previewColorDark ?: dynamicDarkColorScheme(context).primary
                                         } else {

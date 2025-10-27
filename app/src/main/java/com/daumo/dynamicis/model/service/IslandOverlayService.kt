@@ -13,18 +13,12 @@ import android.view.*
 import android.view.WindowManager.LayoutParams.*
 import android.view.accessibility.AccessibilityEvent
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.AndroidUiDispatcher
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.compositionContext
 import androidx.lifecycle.*
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
-import com.daumo.dynamicis.R
 import com.daumo.dynamicis.island.Island
 import com.daumo.dynamicis.island.IslandState
 import com.daumo.dynamicis.island.IslandViewState
@@ -34,8 +28,9 @@ import com.daumo.dynamicis.plugins.ExportedPlugins
 import com.daumo.dynamicis.ui.island.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import com.daumo.dynamicis.R
 
-
+@SuppressLint("AccessibilityPolicy")
 class IslandOverlayService : AccessibilityService() {
 
 	private val params = WindowManager.LayoutParams(

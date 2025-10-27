@@ -38,7 +38,6 @@ import com.daumo.dynamicis.model.service.IslandOverlayService
 import com.daumo.dynamicis.ui.theme.DynamicIslandTheme
 import com.daumo.dynamicis.ui.theme.Theme
 
-
 @RequiresApi(Build.VERSION_CODES.S)
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

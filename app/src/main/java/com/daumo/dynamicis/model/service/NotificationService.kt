@@ -18,7 +18,7 @@ import com.daumo.dynamicis.model.NOTIFICATION_REMOVED
 import com.daumo.dynamicis.island.IslandSettings
 
 
-class NotificationService : android.service.notification.NotificationListenerService() {
+class NotificationService : NotificationListenerService() {
 
 	var notifications = mutableStateListOf<StatusBarNotification>()
 
@@ -30,7 +30,7 @@ class NotificationService : android.service.notification.NotificationListenerSer
 		}
 	}
 
-	private val mBroadcastReceiver: BroadcastReceiver = object : android.content.BroadcastReceiver() {
+	private val mBroadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
 		override fun onReceive(context: Context, intent: Intent) {
 
 			val statusBarNotification = notifications.firstOrNull { it.id == intent.getIntExtra("id", 0) } ?: return
@@ -110,9 +110,7 @@ class NotificationService : android.service.notification.NotificationListenerSer
 		})
 	}
 
-	@RequiresApi(Build.VERSION_CODES.N)
     override fun onNotificationRemoved(statusBarNotification: StatusBarNotification) {
-
 		// Remove notification from list
 		notifications.removeIf { it.id == statusBarNotification.id }
 		Log.d("NotificationService", "Removed: $notifications")

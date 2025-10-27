@@ -137,9 +137,9 @@ fun HomeScreen(
 				DisclosureCard(
 					onAcceptClick = {
 						disclosureAccepted = true
-                        settingsPreferences.edit {
-                            putBoolean(
-                                DISCLOSURE_ACCEPTED, true)}
+						settingsPreferences.edit {
+							putBoolean(
+								DISCLOSURE_ACCEPTED, true)}
 					},
 					onShowClick = onShowDisclosureClick
 				)
@@ -442,7 +442,7 @@ fun OptimizationCard(
 							Intent().apply {
 								action = Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
 								data =
-                                    Uri.fromParts("package", packageName, null)
+									Uri.fromParts("package", packageName, null)
 							}
 						)
 					}
@@ -544,7 +544,7 @@ fun PermissionsCard(
 						startForResult.launch(
 							Intent(
 								Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                                "package:${packageName}".toUri()
+								"package:${packageName}".toUri()
 							), null
 						)
 					}

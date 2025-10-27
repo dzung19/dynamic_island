@@ -22,7 +22,7 @@ import com.daumo.dynamicis.plugins.ExportedPlugins
 
 @Composable
 fun PluginScreen(
-	onPluginClicked: (com.daumo.dynamicis.plugins.BasePlugin) -> Unit,
+	onPluginClicked: (BasePlugin) -> Unit,
 ) {
 	LazyColumn(
 		modifier = Modifier
@@ -30,7 +30,7 @@ fun PluginScreen(
 		verticalArrangement = Arrangement.spacedBy(8.dp),
 		contentPadding = PaddingValues(8.dp)
 	) {
-		items(_root_ide_package_.com.daumo.dynamicis.plugins.ExportedPlugins.Companion.plugins) { plugin ->
+		items(ExportedPlugins.Companion.plugins) { plugin ->
 			PluginCard(
 				plugin = plugin,
 				enabled = plugin.enabled.value,

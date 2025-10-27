@@ -24,6 +24,7 @@ import com.daumo.dynamicis.ui.disclosure.DisclosureScreen
 import com.daumo.dynamicis.ui.disclosure.Link
 import com.daumo.dynamicis.ui.theme.DynamicIslandTheme
 import com.daumo.dynamicis.ui.theme.Theme
+import androidx.core.content.edit
 
 class DisclosureActivity : ComponentActivity() {
 
@@ -124,9 +125,9 @@ class DisclosureActivity : ComponentActivity() {
                             onNext = { step++ },
                             onPrevious = { step-- },
                             onStart = {
-                                settingsPreferences.edit()
-                                    .putBoolean(DISCLOSURE_ACCEPTED, true)
-                                    .apply()
+                                settingsPreferences.edit {
+                                    putBoolean(DISCLOSURE_ACCEPTED, true)
+                                }
                                 startActivity(Intent(this, MainActivity::class.java))
                                 finish()
                             },

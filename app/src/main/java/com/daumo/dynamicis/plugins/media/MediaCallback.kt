@@ -26,7 +26,6 @@ class MediaCallback(
 		}
 	}
 
-	@RequiresApi(Build.VERSION_CODES.N)
     override fun onPlaybackStateChanged(state: PlaybackState?) {
 		super.onPlaybackStateChanged(state)
 		if (state == null) return
@@ -53,8 +52,6 @@ class MediaCallback(
 		}
 	}
 
-
-	@RequiresApi(Build.VERSION_CODES.N)
     override fun onSessionDestroyed() {
 		super.onSessionDestroyed()
 		context.removeMedia(mediaController)

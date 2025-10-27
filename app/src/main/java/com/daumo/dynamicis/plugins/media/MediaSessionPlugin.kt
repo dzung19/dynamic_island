@@ -48,6 +48,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,7 +67,6 @@ import com.daumo.dynamicis.model.service.NotificationService
 import com.daumo.dynamicis.plugins.BasePlugin
 import com.daumo.dynamicis.plugins.PluginSettingsItem
 
-
 class MediaSessionPlugin(
     override val id: String = "MediaSessionPlugin",
     override val name: String = "MediaSession",
@@ -74,18 +75,18 @@ class MediaSessionPlugin(
         Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS
     ),
     override var enabled: MutableState<Boolean> = mutableStateOf(false),
-    override var pluginSettings: MutableMap<String, com.daumo.dynamicis.plugins.PluginSettingsItem> = mutableMapOf(),
-) : com.daumo.dynamicis.plugins.BasePlugin() {
+    override var pluginSettings: MutableMap<String, PluginSettingsItem> = mutableMapOf(),
+) : BasePlugin() {
 
-    lateinit var context: com.daumo.dynamicis.model.service.IslandOverlayService
+    lateinit var context: IslandOverlayService
     private lateinit var mediaSessionManager: MediaSessionManager
 
     private var callbackMap = mutableStateMapOf<String, MediaCallback>()
 
     // private var mediaStruct by mutableStateOf<MediaStruct?>(null)
-    private var songPosition by mutableStateOf(0f)
-    private var duration: Long by mutableStateOf(0)
-    private var elapsed: Long by mutableStateOf(0)
+    private var songPosition by mutableFloatStateOf(0f)
+    private var duration: Long by mutableLongStateOf(0)
+    private var elapsed: Long by mutableLongStateOf(0)
 
     private val listenerForActiveSessions =
         OnActiveSessionsChangedListener { controllers ->
@@ -102,7 +103,6 @@ class MediaSessionPlugin(
             }
         }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     fun removeMedia(mediaController: MediaController) {
         callbackMap.remove(mediaController.packageName)
         if (callbackMap.isEmpty()) {
@@ -114,7 +114,7 @@ class MediaSessionPlugin(
         return true
     }
 
-    override fun onCreate(context: com.daumo.dynamicis.model.service.IslandOverlayService?) {
+    override fun onCreate(context: IslandOverlayService?) {
         this.context = context ?: return
 
         // Get the media session manager
@@ -149,8 +149,8 @@ class MediaSessionPlugin(
         val controls = controller.transportControls
 
         var isDragging by remember { mutableStateOf(false) }
-        var draggedPosition by remember { mutableStateOf(0f) }
-        var draggedOffset by remember { mutableStateOf(0f) }
+        var draggedPosition by remember { mutableFloatStateOf(0f) }
+        var draggedOffset by remember { mutableFloatStateOf(0f) }
 
         LaunchedEffect(controller.playbackState?.position) {
             elapsed = controller.playbackState?.position ?: 0
@@ -223,7 +223,6 @@ class MediaSessionPlugin(
                 onValueChangeFinished = {
                     controls.seekTo(((draggedPosition / 100) * duration).toLong())
                     isDragging = false
-                    draggedOffset = if(songPosition.isNaN()) 0f else songPosition - draggedPosition
                 },
                 valueRange = 0f..100f,
             )
@@ -324,7 +323,7 @@ class MediaSessionPlugin(
         }
 
         val icon = context.packageManager.getApplicationIcon(
-            mediaCallback.mediaController.packageName ?: "fr.angel.dynamicisland"
+            mediaCallback.mediaController.packageName ?: "com.daumo.dynamicis"
         )
 
         WaveLoading(

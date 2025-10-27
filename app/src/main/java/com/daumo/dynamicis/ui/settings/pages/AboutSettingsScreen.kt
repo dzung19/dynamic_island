@@ -84,7 +84,7 @@ fun AboutSettingsScreen() {
 				title = "Version",
 				description = version
 			)
-            _root_ide_package_.com.daumo.dynamicis.ui.settings.SettingsDivider(
+            SettingsDivider(
                 modifier = Modifier.padding(vertical = 4.dp))
 			TextSettingsItem(
 				icon = Icons.Default.VerifiedUser,
