@@ -11,6 +11,8 @@ import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
 import android.text.TextUtils
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
@@ -438,13 +440,34 @@ fun OptimizationCard(
 
 				Button(
 					onClick = {
-						startForResult.launch(
-							Intent().apply {
-								action = Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
-								data =
-									Uri.fromParts("package", packageName, null)
+						try {
+							val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS).apply {
+								data = Uri.fromParts("package", packageName, null)
 							}
-						)
+							startForResult.launch(intent)
+							Log.d("HomeScreen", "Launching battery optimization settings")
+						} catch (e: Exception) {
+							Log.w("HomeScreen", "Failed to launch battery optimization settings: ${e.message}")
+							// Fallback to general battery optimization settings if specific intent fails
+							try {
+								val fallbackIntent = Intent(Settings.ACTION_BATTERY_SAVER_SETTINGS)
+								startForResult.launch(fallbackIntent)
+								Log.d("HomeScreen", "Launching fallback battery saver settings")
+							} catch (fallbackException: Exception) {
+								Log.w("HomeScreen", "Failed to launch battery saver settings: ${fallbackException.message}")
+								// Final fallback to application details
+								try {
+									val appDetailsIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+										data = Uri.fromParts("package", packageName, null)
+									}
+									startForResult.launch(appDetailsIntent)
+									Log.d("HomeScreen", "Launching app details settings as final fallback")
+								} catch (finalException: Exception) {
+									Log.e("HomeScreen", "All battery optimization intent attempts failed: ${finalException.message}")
+									Toast.makeText(context, "Unable to open battery settings. Please check app settings manually.", Toast.LENGTH_LONG).show()
+								}
+							}
+						}
 					}
 				) {
 					Text(text = "Disable battery optimization")
