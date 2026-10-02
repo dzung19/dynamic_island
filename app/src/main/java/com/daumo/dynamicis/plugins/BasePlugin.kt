@@ -48,8 +48,12 @@ abstract class BasePlugin {
                 putBoolean(id, enabled)
             }
 
-			context.sendBroadcast(Intent(SETTINGS_CHANGED))
+			val intent = Intent(SETTINGS_CHANGED).apply {
+				setPackage(context.packageName)
+			}
+			context.sendBroadcast(intent)
 			this.enabled.value = enabled
+			IslandOverlayService.getInstance()?.init()
 
 			true
 		} else {

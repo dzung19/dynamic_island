@@ -81,7 +81,7 @@ class MainActivity : ComponentActivity() {
 
 		// Invert theme in app
 		settingsPreferences.edit { putBoolean(THEME_INVERTED, true) }
-		sendBroadcast(Intent(SETTINGS_THEME_INVERTED))
+		sendBroadcast(Intent(SETTINGS_THEME_INVERTED).setPackage(packageName))
 
 		setContent {
 			// Setup plugins
@@ -204,27 +204,27 @@ class MainActivity : ComponentActivity() {
 		super.onDestroy()
 		// Un-invert theme in app
 		settingsPreferences.edit { putBoolean(THEME_INVERTED, false) }
-		sendBroadcast(Intent(SETTINGS_THEME_INVERTED))
+		sendBroadcast(Intent(SETTINGS_THEME_INVERTED).setPackage(packageName))
 	}
 
 	override fun onStop() {
 		super.onStop()
 		// Un-invert theme in app
 		settingsPreferences.edit { putBoolean(THEME_INVERTED, false) }
-		sendBroadcast(Intent(SETTINGS_THEME_INVERTED))
+		sendBroadcast(Intent(SETTINGS_THEME_INVERTED).setPackage(packageName))
 	}
 
 	override fun onPause() {
 		super.onPause()
 		// Un-invert theme in app
 		settingsPreferences.edit { putBoolean(THEME_INVERTED, false) }
-		sendBroadcast(Intent(SETTINGS_THEME_INVERTED))
+		sendBroadcast(Intent(SETTINGS_THEME_INVERTED).setPackage(packageName))
 	}
 
 	override fun onResume() {
 		super.onResume()
 		// Invert theme in app
 		settingsPreferences.edit { putBoolean(THEME_INVERTED, true) }
-		sendBroadcast(Intent(SETTINGS_THEME_INVERTED))
+		sendBroadcast(Intent(SETTINGS_THEME_INVERTED).setPackage(packageName))
 	}
 }

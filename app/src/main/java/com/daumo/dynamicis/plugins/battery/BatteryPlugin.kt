@@ -50,22 +50,26 @@ class BatteryPlugin(
 	private lateinit var context: IslandOverlayService
 	var batteryPercent by mutableIntStateOf(0)
 
+	private fun updateBatteryStatus(intent: Intent) {
+		val status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
+		val isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
+			status == BatteryManager.BATTERY_STATUS_FULL
+
+		if (isCharging) {
+			this@BatteryPlugin.context.addPlugin(this@BatteryPlugin)
+			val batteryLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
+			val maxBatteryLevel = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
+			if (maxBatteryLevel > 0) {
+				batteryPercent = (batteryLevel * 100 / maxBatteryLevel)
+			}
+		} else {
+			this@BatteryPlugin.context.removePlugin(this@BatteryPlugin)
+		}
+	}
+
 	private val mBroadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
 		override fun onReceive(context: Context, intent: Intent) {
-			// Get battery status extra
-			val status = intent.extras!!.getInt(BatteryManager.EXTRA_STATUS)
-			val isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING
-
-			// If charging, add plugin else remove it
-			if (isCharging) {
-				this@BatteryPlugin.context.addPlugin(this@BatteryPlugin)
-				val batteryLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
-				val maxBatteryLevel = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
-				// Set battery percent
-				batteryPercent = (batteryLevel * 100 / maxBatteryLevel)
-			} else {
-				this@BatteryPlugin.context.removePlugin(this@BatteryPlugin)
-			}
+			updateBatteryStatus(intent)
 		}
 	}
 
@@ -73,7 +77,8 @@ class BatteryPlugin(
 
 	override fun onCreate(context: IslandOverlayService?) {
 		this.context = context ?: return
-		context.registerReceiver(mBroadcastReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+		val stickyIntent = context.registerReceiver(mBroadcastReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+		stickyIntent?.let { updateBatteryStatus(it) }
 
 		// Check for plugin internal settings
 		pluginSettings.values.forEach {

@@ -2,33 +2,56 @@ package com.daumo.dynamicis.model.service
 
 import android.accessibilityservice.AccessibilityService
 import android.annotation.SuppressLint
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
 import android.content.Intent.ACTION_SCREEN_OFF
 import android.content.Intent.ACTION_SCREEN_ON
+import android.content.IntentFilter
+import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.graphics.PixelFormat
 import android.os.Build
 import android.util.Log
-import android.view.*
-import android.view.WindowManager.LayoutParams.*
+import android.view.Gravity
+import android.view.WindowManager
+import android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+import android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+import android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+import android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+import android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
+import android.view.WindowManager.LayoutParams.WRAP_CONTENT
 import android.view.accessibility.AccessibilityEvent
 import androidx.annotation.RequiresApi
-import androidx.compose.runtime.*
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Recomposer
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.AndroidUiDispatcher
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.compositionContext
-import androidx.lifecycle.*
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
+import com.daumo.dynamicis.R
 import com.daumo.dynamicis.island.Island
 import com.daumo.dynamicis.island.IslandState
 import com.daumo.dynamicis.island.IslandViewState
-import com.daumo.dynamicis.model.*
+import com.daumo.dynamicis.model.MyLifecycleOwner
+import com.daumo.dynamicis.model.SETTINGS_CHANGED
+import com.daumo.dynamicis.model.SETTINGS_KEY
+import com.daumo.dynamicis.model.SETTINGS_THEME_INVERTED
+import com.daumo.dynamicis.model.THEME_INVERTED
 import com.daumo.dynamicis.plugins.BasePlugin
 import com.daumo.dynamicis.plugins.ExportedPlugins
-import com.daumo.dynamicis.ui.island.*
+import com.daumo.dynamicis.ui.island.IslandApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import com.daumo.dynamicis.R
 
 @SuppressLint("AccessibilityPolicy")
 class IslandOverlayService : AccessibilityService() {
@@ -113,15 +136,16 @@ class IslandOverlayService : AccessibilityService() {
 	}
 
 	fun init() {
+		// Reload plugin states from preferences
+		ExportedPlugins.Companion.setupPlugins(context = this)
+
 		// Remove plugins
 		plugins.forEach {
 			it.onDestroy()
 		}
 
-		// Remove binded plugins
-		bindedPlugins.forEach {
-			bindedPlugins.remove(it)
-		}
+		// Remove binded plugins safely
+		bindedPlugins.clear()
 
 		// Reset island state
 		islandState = IslandViewState.Closed
@@ -220,7 +244,6 @@ class IslandOverlayService : AccessibilityService() {
 			Log.d("OverlayService", "Plugin with id ${plugin.id} added at the end")
 		}
 	}
-	@RequiresApi(Build.VERSION_CODES.N)
     fun removePlugin(plugin: BasePlugin) {
 		Log.d("OverlayService", "Plugin with id ${plugin.id} removed")
 		bindedPlugins.removeIf { it.id == plugin.id }
