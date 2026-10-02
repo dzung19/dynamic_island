@@ -36,12 +36,13 @@ class MediaCallback(
 		if (state == null) return
 		// Update the playback state
 		mediaStruct.playbackState.value = state
-		context.context.addPlugin(context)
 
-		// If media is paused, remove the plugin after 60 seconds
+		// Only add/keep plugin when media is actively playing
 		if (state.state == PlaybackState.STATE_PLAYING) {
 			handler.removeCallbacksAndMessages(null)
+			context.context.addPlugin(context)
 		} else {
+			handler.removeCallbacksAndMessages(null)
 			handler.postDelayed ({
 				context.context.removePlugin(context)
 			}, 60000)

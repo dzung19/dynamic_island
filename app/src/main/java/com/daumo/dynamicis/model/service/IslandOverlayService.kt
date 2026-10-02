@@ -147,15 +147,15 @@ class IslandOverlayService : AccessibilityService() {
 		// Remove binded plugins safely
 		bindedPlugins.clear()
 
-		// Reset island state
-		islandState = IslandViewState.Closed
-
 		// Initialize the plugins
 		plugins.forEach {
 			if (!it.active) return@forEach
 			it.onCreate(this)
 //			Log.d("OverlayService", "Plugin ${it.name} initialized")
 		}
+
+		// Update island state according to whether any plugin bound itself
+		islandState = if (bindedPlugins.isNotEmpty()) IslandViewState.Opened else IslandViewState.Closed
 
 		// Setup inverted theme
 		val settingsPreferences = getSharedPreferences(SETTINGS_KEY, Context.MODE_PRIVATE)
@@ -175,10 +175,12 @@ class IslandOverlayService : AccessibilityService() {
 		composeView.setContent {
 			// Listen for plugin changes
 			LaunchedEffect(bindedPlugins.firstOrNull()) {
-				islandState = if (bindedPlugins.firstOrNull() != null) {
-					IslandViewState.Opened
+				if (bindedPlugins.firstOrNull() != null) {
+					if (islandState is IslandViewState.Closed) {
+						islandState = IslandViewState.Opened
+					}
 				} else {
-					IslandViewState.Closed
+					islandState = IslandViewState.Closed
 				}
 			}
 
@@ -243,10 +245,16 @@ class IslandOverlayService : AccessibilityService() {
 			bindedPlugins.add(plugin)
 			Log.d("OverlayService", "Plugin with id ${plugin.id} added at the end")
 		}
+		if (islandState is IslandViewState.Closed) {
+			islandState = IslandViewState.Opened
+		}
 	}
     fun removePlugin(plugin: BasePlugin) {
 		Log.d("OverlayService", "Plugin with id ${plugin.id} removed")
 		bindedPlugins.removeIf { it.id == plugin.id }
+		if (bindedPlugins.isEmpty()) {
+			islandState = IslandViewState.Closed
+		}
 	}
 
 	fun expand() { islandState = IslandViewState.Expanded(configuration = resources.configuration) }
