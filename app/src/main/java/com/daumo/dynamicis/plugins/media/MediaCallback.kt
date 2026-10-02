@@ -18,10 +18,15 @@ class MediaCallback(
 	private val handler = Handler(Looper.getMainLooper())
 
 	init {
-		if (mediaController.metadata != null && mediaController.playbackState != null) {
-			mediaMetadata = mediaController.metadata!!
-			mediaStruct.playbackState.value = mediaController.playbackState!!
-//			mediaController.sessionActivity?.send(PendingIntent.FLAG_IMMUTABLE)
+		val metadata = mediaController.metadata
+		val playbackState = mediaController.playbackState
+		if (metadata != null) {
+			mediaMetadata = metadata
+		}
+		if (playbackState != null) {
+			mediaStruct.playbackState.value = playbackState
+		}
+		if (metadata != null && playbackState != null) {
 			updateMediaStruct(addPlugin = mediaStruct.playbackState.value.state == PlaybackState.STATE_PLAYING)
 		}
 	}
@@ -58,8 +63,9 @@ class MediaCallback(
 	}
 
 	private fun updateMediaStruct(addPlugin: Boolean = true) {
-		mediaStruct.title.value = (mediaMetadata.getText(MediaMetadata.METADATA_KEY_TITLE) ?: "") as String
-		mediaStruct.artist.value = (mediaMetadata.getText(MediaMetadata.METADATA_KEY_ARTIST) ?: "") as String
+		if (!this::mediaMetadata.isInitialized) return
+		mediaStruct.title.value = (mediaMetadata.getText(MediaMetadata.METADATA_KEY_TITLE) ?: "").toString()
+		mediaStruct.artist.value = (mediaMetadata.getText(MediaMetadata.METADATA_KEY_ARTIST) ?: "").toString()
 		mediaStruct.cover.value = mediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
 		mediaStruct.duration.value = mediaMetadata.getLong(MediaMetadata.METADATA_KEY_DURATION)
 

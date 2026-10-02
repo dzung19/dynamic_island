@@ -120,11 +120,12 @@ class NotificationPlugin(
 
 				Log.d("NotificationPlugin", "Notification posted: ${notification.notification.extras.getString("android.title")} - ${notification.notification.extras.getString("android.text")}")
 
+				val icon = notification.notification.smallIcon?.loadDrawable(context) ?: return
 				notificationMeta.value = NotificationMeta(
 					title = extras.getString("title"),
 					body = notification.notification.extras.getString("android.text") ?: "",
 					id = extras.getInt("id"),
-					iconDrawable = notification.notification.smallIcon.loadDrawable(context) ?: return,
+					iconDrawable = icon,
 					packageName = extras.getString("package_name") ?: "com.daumo.dynamicis",
 					actions = (notification.notification.actions ?: arrayOf()).toList(),
 					all = extras,
@@ -160,13 +161,14 @@ class NotificationPlugin(
 
 		// Update notification meta if list is not empty else set to null
 		notificationMeta.value = notificationService?.notifications?.firstOrNull()?.let { notification ->
+			val icon = notification.notification.smallIcon?.loadDrawable(context) ?: return@let null
 			NotificationMeta(
 				title = notification.notification.extras.getString("android.title"),
 				body = notification.notification.extras.getString("android.text") ?: "",
 				id = notification.id,
-				iconDrawable = notification.notification.smallIcon.loadDrawable(context) ?: return,
+				iconDrawable = icon,
 				packageName = notification.packageName,
-				actions = notification.notification.actions.toList(),
+				actions = (notification.notification.actions ?: arrayOf()).toList(),
 				all = notification.notification.extras,
 				statusBarNotification = notification
 			)
@@ -336,8 +338,12 @@ class NotificationPlugin(
 									modifier = Modifier.weight(1f),
 									onClick = {
 										// Classic action
-										val intent = action.actionIntent
-										intent.send()
+										try {
+											val intent = action.actionIntent
+											intent.send()
+										} catch (e: Exception) {
+											Log.w("NotificationPlugin", "Failed to send action intent: ${e.message}")
+										}
 										// Remove notification
 										context.sendBroadcast(Intent(
                                             ACTION_CLOSE).apply {
@@ -412,7 +418,11 @@ class NotificationPlugin(
 										putCharSequence(remoteInput.resultKey, replyText.value.text)
 									}
 									RemoteInput.addResultsToIntent(action.remoteInputs, intent, bundle)
-									action.actionIntent.send(context, 0, intent)
+									try {
+										action.actionIntent.send(context, 0, intent)
+									} catch (e: Exception) {
+										Log.w("NotificationPlugin", "Failed to send reply intent: ${e.message}")
+									}
 									// Remove notification
 									context.sendBroadcast(Intent(
                                         ACTION_CLOSE).apply {
@@ -444,6 +454,7 @@ class NotificationPlugin(
 		context.sendBroadcast(intent)
 		val packageManager = context.packageManager
 		val i = packageManager.getLaunchIntentForPackage(meta.packageName) ?: return
+		i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 		context.startActivity(i)
 	}
 
@@ -509,8 +520,8 @@ class NotificationPlugin(
 	private fun restartTimeout() {
 		handler.removeCallbacksAndMessages(null)
 		handler.postDelayed({
-			if (notificationMeta.value != null) {
-				removeNotificationAndUpdateState(notificationMeta.value!!.id)
+			notificationMeta.value?.id?.let { id ->
+				removeNotificationAndUpdateState(id)
 				Log.d("NotificationPlugin", "Timeout: Remove notification")
 			}
 		}, IslandSettings.Companion.instance.autoHideOpenedAfter.toLong())

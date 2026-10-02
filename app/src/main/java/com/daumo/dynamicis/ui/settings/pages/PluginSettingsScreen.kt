@@ -92,7 +92,9 @@ fun PluginSettingsScreen(
 			)
 		}
 		items(plugin.permissions) { permission ->
-			PermissionSettings(permission = ExportedPlugins.permissions[permission]!!)
+			ExportedPlugins.permissions[permission]?.let {
+				PermissionSettings(permission = it)
+			}
 		}
 
 		// Plugin settings

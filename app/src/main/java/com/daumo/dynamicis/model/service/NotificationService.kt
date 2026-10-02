@@ -39,23 +39,33 @@ class NotificationService : NotificationListenerService() {
 
 			if (intent.action == ACTION_OPEN_CLOSE) {
 				// Logic to remove notification
-				if (notification.deleteIntent != null) {
-					// Delete notification
-					notification.deleteIntent.send()
-				} else {
-					// If notification is not deletable, cancel it
-					cancelNotification(statusBarNotification.key)
+				try {
+					if (notification.deleteIntent != null) {
+						notification.deleteIntent.send()
+					} else {
+						cancelNotification(statusBarNotification.key)
+					}
+				} catch (e: Exception) {
+					Log.w("NotificationService", "Failed to delete notification: ${e.message}")
 				}
 
-				// Start content intent from notification
-				notification.contentIntent.send()
+				// Start content intent from notification safely
+				try {
+					notification.contentIntent?.send()
+				} catch (e: Exception) {
+					Log.w("NotificationService", "Failed to send contentIntent: ${e.message}")
+				}
 			}
 			if (intent.action == ACTION_CLOSE) {
 				// Logic to remove notification
-				if (notification.deleteIntent != null) {
-					notification.deleteIntent.send()
-				} else {
-					cancelNotification(statusBarNotification.key)
+				try {
+					if (notification.deleteIntent != null) {
+						notification.deleteIntent.send()
+					} else {
+						cancelNotification(statusBarNotification.key)
+					}
+				} catch (e: Exception) {
+					Log.w("NotificationService", "Failed to delete notification: ${e.message}")
 				}
 			}
 		}
@@ -97,6 +107,7 @@ class NotificationService : NotificationListenerService() {
 		Log.d("NotificationService", "Posted: ${notifications.size}")
 
 		sendBroadcast(Intent(NOTIFICATION_POSTED).apply {
+			setPackage(packageName)
 			putExtra("id", statusBarNotification.id)
 			putExtra("package_name", statusBarNotification.packageName)
 			putExtra("category", notification.category)
@@ -118,6 +129,7 @@ class NotificationService : NotificationListenerService() {
 
 		// Send broadcast
 		sendBroadcast(Intent(NOTIFICATION_REMOVED).apply {
+			setPackage(packageName)
 			putExtra("id", statusBarNotification.id)
 		})
 	}
@@ -125,6 +137,8 @@ class NotificationService : NotificationListenerService() {
 	override fun onDestroy() {
 		super.onDestroy()
 		instance = null
-		unregisterReceiver(mBroadcastReceiver)
+		try {
+			unregisterReceiver(mBroadcastReceiver)
+		} catch (_: Exception) {}
 	}
 }

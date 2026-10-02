@@ -121,23 +121,29 @@ class MediaSessionPlugin(
         mediaSessionManager =
             context.getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
 
-        // Register the listener for active sessions
-        mediaSessionManager.addOnActiveSessionsChangedListener(
-            listenerForActiveSessions,
-            ComponentName(context, NotificationService::class.java)
-        )
-        mediaSessionManager.getActiveSessions(
-            ComponentName(
-                context,
-                NotificationService::class.java
+        try {
+            // Register the listener for active sessions
+            mediaSessionManager.addOnActiveSessionsChangedListener(
+                listenerForActiveSessions,
+                ComponentName(context, NotificationService::class.java)
             )
-        ).forEach { controller ->
-            // Cancel if already exists
-            if (callbackMap[controller.packageName] != null) return@forEach
+            mediaSessionManager.getActiveSessions(
+                ComponentName(
+                    context,
+                    NotificationService::class.java
+                )
+            ).forEach { controller ->
+                // Cancel if already exists
+                if (callbackMap[controller.packageName] != null) return@forEach
 
-            val callback = MediaCallback(controller, this)
-            callbackMap[controller.packageName] = callback
-            controller.registerCallback(callback)
+                val callback = MediaCallback(controller, this)
+                callbackMap[controller.packageName] = callback
+                controller.registerCallback(callback)
+            }
+        } catch (e: SecurityException) {
+            Log.w("MediaSessionPlugin", "Notification Listener permission not granted: ${e.message}")
+        } catch (e: Exception) {
+            Log.e("MediaSessionPlugin", "Error initializing MediaSessionPlugin: ${e.message}")
         }
     }
 
@@ -156,7 +162,7 @@ class MediaSessionPlugin(
             elapsed = controller.playbackState?.position ?: 0
             duration = controller.metadata?.getLong(MediaMetadata.METADATA_KEY_DURATION) ?: 0
 
-            songPosition = (elapsed / duration.toFloat()) * 100
+            songPosition = if (duration > 0) ((elapsed.toFloat() / duration) * 100).coerceIn(0f, 100f) else 0f
         }
 
         Column(
@@ -269,14 +275,26 @@ class MediaSessionPlugin(
         val controller = current.mediaController
         val packageManager = context.packageManager
         val intent = packageManager.getLaunchIntentForPackage(controller.packageName) ?: return
-        val pendingIntent = PendingIntent.getActivity(context,0,intent,PendingIntent.FLAG_IMMUTABLE)
-        pendingIntent.send()
+        try {
+            val pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+            pendingIntent.send()
+        } catch (e: Exception) {
+            Log.w("MediaSessionPlugin", "Failed to launch media app: ${e.message}")
+        }
     }
 
     override fun onDestroy() {
         if (!::mediaSessionManager.isInitialized) return
-        // Unregister the listener for active sessions
-        mediaSessionManager.removeOnActiveSessionsChangedListener(listenerForActiveSessions)
+        try {
+            callbackMap.values.forEach { callback ->
+                callback.mediaController.unregisterCallback(callback)
+            }
+            callbackMap.clear()
+            // Unregister the listener for active sessions
+            mediaSessionManager.removeOnActiveSessionsChangedListener(listenerForActiveSessions)
+        } catch (e: Exception) {
+            Log.w("MediaSessionPlugin", "Error during onDestroy: ${e.message}")
+        }
     }
 
     @Composable
@@ -290,12 +308,13 @@ class MediaSessionPlugin(
     @Composable
     override fun LeftOpenedComposable() {
         val mediaCallback = callbackMap.values.firstOrNull() ?: return
+        val cover = mediaCallback.mediaStruct.cover.value
 
-        if (mediaCallback.mediaStruct.cover.value != null) {
-            Crossfade(targetState = mediaCallback.mediaStruct.cover.value!!) {
+        if (cover != null) {
+            Crossfade(targetState = cover) { bitmap ->
                 Image(
-                    bitmap = it.asImageBitmap(),
-                    contentDescription = "Pause",
+                    bitmap = bitmap.asImageBitmap(),
+                    contentDescription = "Cover",
                     modifier = Modifier.clip(CircleShape)
                 )
             }
@@ -319,15 +338,19 @@ class MediaSessionPlugin(
             elapsed = mediaCallback.mediaStruct.playbackState.value.position
             duration = mediaCallback.mediaStruct.duration.value
 
-            songPosition = (elapsed / duration.toFloat()) * 100
+            songPosition = if (duration > 0) ((elapsed.toFloat() / duration) * 100).coerceIn(0f, 100f) else 0f
         }
 
-        val icon = context.packageManager.getApplicationIcon(
-            mediaCallback.mediaController.packageName ?: "com.daumo.dynamicis"
-        )
+        val icon = try {
+            context.packageManager.getApplicationIcon(
+                mediaCallback.mediaController.packageName ?: "com.daumo.dynamicis"
+            )
+        } catch (_: Exception) {
+            null
+        }
 
         WaveLoading(
-            progress = animateFloatAsState(targetValue = songPosition / 100).value,
+            progress = animateFloatAsState(targetValue = (songPosition / 100).coerceIn(0f, 1f)).value,
             backDrawType = DrawType.DrawImage,
             modifier = Modifier
                 .fillMaxHeight()
@@ -335,10 +358,17 @@ class MediaSessionPlugin(
                 .aspectRatio(1f)
                 .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
         ) {
-            Image(
-                painter = rememberDrawablePainter(drawable = icon),
-                contentDescription = null
-            )
+            if (icon != null) {
+                Image(
+                    painter = rememberDrawablePainter(drawable = icon),
+                    contentDescription = null
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Default.MusicNote,
+                    contentDescription = null
+                )
+            }
         }
     }
 }

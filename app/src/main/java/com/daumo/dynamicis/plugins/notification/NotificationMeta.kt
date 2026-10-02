@@ -18,7 +18,11 @@ class NotificationMeta(
 	var statusBarNotification: StatusBarNotification
 ) {
 	fun getAppName(context: Context): String {
-		val applicationInfo: ApplicationInfo = context.packageManager?.getApplicationInfo(packageName, 0) ?: return "Error getting app name"
-		return (context.packageManager?.getApplicationLabel(applicationInfo) ?: "Error getting app name").toString()
+		return try {
+			val applicationInfo: ApplicationInfo = context.packageManager?.getApplicationInfo(packageName, 0) ?: return "Unknown"
+			(context.packageManager?.getApplicationLabel(applicationInfo) ?: "Unknown").toString()
+		} catch (_: Exception) {
+			"Unknown"
+		}
 	}
 }

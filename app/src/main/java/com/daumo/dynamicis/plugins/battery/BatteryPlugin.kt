@@ -107,7 +107,7 @@ class BatteryPlugin(
 			Box(
 				modifier = Modifier
 					.fillMaxHeight()
-					.fillMaxWidth(batteryPercent / 100f)
+					.fillMaxWidth((batteryPercent / 100f).coerceIn(0.001f, 1f))
 					.background(MaterialTheme.colorScheme.tertiary),
 				contentAlignment = Alignment.Center
 			) {
@@ -153,7 +153,8 @@ class BatteryPlugin(
 
 	@Composable
 	override fun RightOpenedComposable() {
-		if ((pluginSettings[BATTERY_SHOW_PERCENTAGE] as PluginSettingsItem.SwitchSettingsItem).value.value) {
+		val showPercentage = (pluginSettings[BATTERY_SHOW_PERCENTAGE] as? PluginSettingsItem.SwitchSettingsItem)?.value?.value ?: true
+		if (showPercentage) {
 			Text(
 				text = "$batteryPercent%",
 				modifier = Modifier.padding(end = 4.dp),
