@@ -25,14 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester.Companion.createRefs
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.LottieConstants.IterateForever
-import com.airbnb.lottie.compose.rememberLottieComposition
-import com.daumo.dynamicis.R
 import com.daumo.dynamicis.island.*
 import com.daumo.dynamicis.model.service.IslandOverlayService
 import com.daumo.dynamicis.ui.theme.DynamicIslandTheme
@@ -49,10 +43,6 @@ fun IslandApp(
     LaunchedEffect(Unit) {
         IslandSettings.Companion.instance.loadSettings(context = context)
     }
-    val composition =
-        rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.snow_fall))
-    val composition1 =
-        rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.valentine))
     val (description, illustration) = createRefs()
     val islandView = islandOverlayService.islandState
     val bindedPlugin = islandOverlayService.bindedPlugins.firstOrNull()
@@ -142,35 +132,6 @@ fun IslandApp(
                     )
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Crossfade(
-                            targetState = islandOverlayService.islandState.state,
-                            animationSpec = tween(100), label = ""
-                        ) {
-                            when (it) {
-                                IslandStates.Opened -> {
-                                    LottieAnimation(
-                                        composition = composition1.value,
-                                        iterations = IterateForever,
-                                        contentScale = ContentScale.Crop)
-                                }
-
-                                IslandStates.Expanded -> {
-                                    LottieAnimation(
-                                        composition = composition1.value,
-                                        iterations = IterateForever,
-                                        contentScale = ContentScale.FillBounds
-                                    )
-                                }
-
-                                IslandStates.Closed -> {
-                                    LottieAnimation(
-                                        composition = composition1.value,
-                                        iterations = IterateForever,
-                                        contentScale = ContentScale.Crop
-                                    )
-                                }
-                            }
-                        }
                         Crossfade(
                             targetState = islandOverlayService.islandState.state,
                             animationSpec = tween(100), label = ""

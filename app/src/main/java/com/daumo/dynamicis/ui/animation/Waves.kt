@@ -22,8 +22,8 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 @Composable
-fun WavesLoadingIndicator(modifier: Modifier, color: Color, progress: Float) {
-	BoxWithConstraints(modifier = modifier.offset(y = 16.dp), contentAlignment = Alignment.Center) {
+fun WavesLoadingIndicator(modifier: Modifier = Modifier, color: Color, progress: Float) {
+	BoxWithConstraints(modifier = modifier, contentAlignment = Alignment.Center) {
 		val constraintsWidth = maxWidth
 		val constraintsHeight = maxHeight
 		val density = LocalDensity.current
@@ -35,12 +35,16 @@ fun WavesLoadingIndicator(modifier: Modifier, color: Color, progress: Float) {
 			color,
 			density
 		) {
-			value = withContext(Dispatchers.Default) {
-				createWavesShader(
-					width = with(density) { constraintsWidth.roundToPx() },
-					height = with(density) { constraintsHeight.roundToPx() },
-					color = color
-				)
+			val widthPx = with(density) { constraintsWidth.roundToPx() }
+			val heightPx = with(density) { constraintsHeight.roundToPx() }
+			if (widthPx > 0 && heightPx > 0) {
+				value = withContext(Dispatchers.Default) {
+					createWavesShader(
+						width = widthPx,
+						height = heightPx,
+						color = color
+					)
+				}
 			}
 		}
 
@@ -116,6 +120,10 @@ private fun rememberWavesTransition(): WavesTransition {
 
 @Stable
 private fun createWavesShader(width: Int, height: Int, color: Color): Shader {
+	if (width <= 0 || height <= 0) {
+		val emptyBitmap = ImageBitmap(1, 1, ImageBitmapConfig.Argb8888)
+		return ImageShader(image = emptyBitmap, tileModeX = TileMode.Clamp, tileModeY = TileMode.Clamp)
+	}
 	val angularFrequency = 2f * PI / width
 	val amplitude = height * AmplitudeRatio
 	val waterLevel = height * WaterLevelRatio

@@ -52,6 +52,7 @@ fun DisclosureScreen(
 		WavesLoadingIndicator(
             modifier = Modifier
                 .fillMaxSize()
+                .offset(y = 16.dp)
                 .alpha(0.4f),
             color = MaterialTheme.colorScheme.primaryContainer,
             progress = animateFloatAsState(

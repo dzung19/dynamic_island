@@ -5,10 +5,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.Image
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BatteryChargingFull
 import androidx.compose.material3.Icon
@@ -17,17 +19,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.github.compose.waveloading.DrawType
-import com.github.compose.waveloading.WaveLoading
 import com.daumo.dynamicis.R
+import com.daumo.dynamicis.island.IslandViewState
 import com.daumo.dynamicis.model.BATTERY_SHOW_PERCENTAGE
 import com.daumo.dynamicis.model.service.IslandOverlayService
 import com.daumo.dynamicis.plugins.BasePlugin
 import com.daumo.dynamicis.plugins.PluginSettingsItem
+import com.daumo.dynamicis.ui.animation.WavesLoadingIndicator
 import com.daumo.dynamicis.ui.theme.BatteryEmpty
 import com.daumo.dynamicis.ui.theme.BatteryFull
 
@@ -73,7 +76,7 @@ class BatteryPlugin(
 		}
 	}
 
-	override fun canExpand(): Boolean { return false } // TODO: Add expandable function
+	override fun canExpand(): Boolean { return true }
 
 	override fun onCreate(context: IslandOverlayService?) {
 		this.context = context ?: return
@@ -97,56 +100,122 @@ class BatteryPlugin(
 	private fun BatteryView(
 		batteryPercent: Int
 	) {
-		Row(
-			modifier = Modifier
-				.fillMaxSize(),
-			verticalAlignment = Alignment.CenterVertically,
-			horizontalArrangement = Arrangement.Start
+		val batteryFraction = (batteryPercent.toFloat() / 100f).coerceIn(0f, 1f)
+		val animatedProgress by animateFloatAsState(
+			targetValue = batteryFraction,
+			animationSpec = tween(durationMillis = 600, easing = FastOutSlowInEasing),
+			label = "battery_progress"
+		)
+		val batteryColor = pointBetweenColors(BatteryEmpty, BatteryFull, batteryFraction)
+
+		Box(
+			modifier = Modifier.fillMaxSize(),
+			contentAlignment = Alignment.Center
 		) {
-			// TODO: Replace with wave animation when jitpack will be fixed
-			Box(
+			// Waves animation in background
+			WavesLoadingIndicator(
 				modifier = Modifier
-					.fillMaxHeight()
-					.fillMaxWidth((batteryPercent / 100f).coerceIn(0.001f, 1f))
-					.background(MaterialTheme.colorScheme.tertiary),
-				contentAlignment = Alignment.Center
+					.fillMaxSize()
+					.alpha(0.5f),
+				color = batteryColor,
+				progress = animatedProgress
+			)
+
+			// Foreground battery information
+			Row(
+				modifier = Modifier
+					.fillMaxSize()
+					.padding(horizontal = 20.dp, vertical = 12.dp),
+				verticalAlignment = Alignment.CenterVertically,
+				horizontalArrangement = Arrangement.SpaceBetween
 			) {
-				if (batteryPercent == 100) {
-					Icon(
-						imageVector = Icons.Default.BatteryChargingFull,
-						contentDescription = null,
-						tint = MaterialTheme.colorScheme.onTertiary,
+				Row(
+					verticalAlignment = Alignment.CenterVertically,
+					horizontalArrangement = Arrangement.spacedBy(12.dp)
+				) {
+					Box(
 						modifier = Modifier
-							.rotate(90f)
-							.fillMaxSize(.35f)
-					)
+							.size(44.dp)
+							.clip(CircleShape)
+							.background(batteryColor.copy(alpha = 0.25f)),
+						contentAlignment = Alignment.Center
+					) {
+						Icon(
+							painter = painterResource(id = R.drawable.ic_charging_full),
+							contentDescription = null,
+							tint = batteryColor,
+							modifier = Modifier.size(26.dp)
+						)
+					}
+					Column(
+						verticalArrangement = Arrangement.Center
+					) {
+						Text(
+							text = if (batteryPercent >= 100) "Fully Charged" else "Charging",
+							style = MaterialTheme.typography.titleMedium,
+							color = MaterialTheme.colorScheme.onSurface
+						)
+						Text(
+							text = if (batteryPercent >= 100) "Unplug charger" else "Battery level",
+							style = MaterialTheme.typography.bodySmall,
+							color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+						)
+					}
 				}
+
+				Text(
+					text = "$batteryPercent%",
+					style = MaterialTheme.typography.headlineMedium,
+					color = MaterialTheme.colorScheme.onSurface
+				)
 			}
 		}
 	}
 
 	@Composable
 	override fun LeftOpenedComposable() {
-		WaveLoading(
-			progress = animateFloatAsState(targetValue = batteryPercent.toFloat() / 100).value,
-			foreDrawType = DrawType.DrawColor(pointBetweenColors(
-                BatteryEmpty,
-                BatteryFull, batteryPercent.toFloat() / 100)),
-			backDrawType = DrawType.DrawColor(pointBetweenColors(pointBetweenColors(
-                BatteryEmpty,
-                BatteryFull, batteryPercent.toFloat() / 100), MaterialTheme.colorScheme.surface, .75f)),
+		val batteryFraction = (batteryPercent.toFloat() / 100f).coerceIn(0f, 1f)
+		val animatedProgress by animateFloatAsState(
+			targetValue = batteryFraction,
+			animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
+			label = "battery_left_progress"
+		)
+		val batteryColor = pointBetweenColors(BatteryEmpty, BatteryFull, batteryFraction)
+
+		Box(
 			modifier = Modifier
 				.fillMaxHeight()
 				.aspectRatio(1f)
+				.clip(CircleShape)
+				.background(batteryColor.copy(alpha = 0.2f)),
+			contentAlignment = Alignment.Center
 		) {
-			Image(
+			WavesLoadingIndicator(
+				modifier = Modifier.fillMaxSize(),
+				color = batteryColor,
+				progress = animatedProgress
+			)
+			Icon(
 				painter = painterResource(id = R.drawable.ic_charging_full),
 				contentDescription = "Battery level: $batteryPercent%",
+				tint = MaterialTheme.colorScheme.onSurface,
+				modifier = Modifier.fillMaxSize(0.65f)
 			)
 		}
 	}
 
-	override fun onClick() {}
+	override fun onClick() {
+		if (context.islandState is IslandViewState.Expanded) {
+			context.shrink()
+		} else {
+			try {
+				val intent = Intent(Intent.ACTION_POWER_USAGE_SUMMARY).apply {
+					flags = Intent.FLAG_ACTIVITY_NEW_TASK
+				}
+				context.startActivity(intent)
+			} catch (_: Exception) {}
+		}
+	}
 
 	override fun onLeftSwipe() {}
 	override fun onRightSwipe() {}
