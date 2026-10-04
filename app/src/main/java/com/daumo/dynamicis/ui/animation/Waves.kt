@@ -102,8 +102,8 @@ private fun rememberWavesTransition(): WavesTransition {
 	)
 
 	val amplitudeRatio = transition.animateFloat(
-		initialValue = 0.005f,
-		targetValue = 0.015f,
+		initialValue = 0.06f,
+		targetValue = 0.10f,
 		animationSpec = infiniteRepeatable(
 			animation = tween(
 				durationMillis = WavesAmplitudeAnimationDurationInMillis,
@@ -124,7 +124,8 @@ private fun createWavesShader(width: Int, height: Int, color: Color): Shader {
 		val emptyBitmap = ImageBitmap(1, 1, ImageBitmapConfig.Argb8888)
 		return ImageShader(image = emptyBitmap, tileModeX = TileMode.Clamp, tileModeY = TileMode.Clamp)
 	}
-	val angularFrequency = 2f * PI / width
+	val waveCycles = maxOf(2, width / 200)
+	val angularFrequency = waveCycles * 2f * PI / width
 	val amplitude = height * AmplitudeRatio
 	val waterLevel = height * WaterLevelRatio
 
@@ -138,7 +139,7 @@ private fun createWavesShader(width: Int, height: Int, color: Color): Shader {
 
 	val waveY = FloatArray(size = width + 1)
 
-	wavePaint.color = color.copy(alpha = 0.3f)
+	wavePaint.color = color.copy(alpha = 0.35f)
 	for (beginX in 0..width) {
 		val wx = beginX * angularFrequency
 		val beginY = waterLevel + amplitude * sin(wx).toFloat()
@@ -150,9 +151,9 @@ private fun createWavesShader(width: Int, height: Int, color: Color): Shader {
 		waveY[beginX] = beginY
 	}
 
-	wavePaint.color = color
+	wavePaint.color = color.copy(alpha = 0.65f)
 	val endX = width + 1
-	val waveToShift = width / 4
+	val waveToShift = width / (waveCycles * 4)
 	for (beginX in 0..width) {
 		canvas.drawLine(
 			p1 = Offset(x = beginX.toFloat(), y = waveY[(beginX + waveToShift).rem(endX)]),
@@ -163,7 +164,7 @@ private fun createWavesShader(width: Int, height: Int, color: Color): Shader {
 	return ImageShader(image = bitmap, tileModeX = TileMode.Repeated, tileModeY = TileMode.Clamp)
 }
 
-private const val AmplitudeRatio = 0.05f
+private const val AmplitudeRatio = 0.08f
 private const val WaterLevelRatio = 0.5f
-private const val WavesShiftAnimationDurationInMillis = 2500
-private const val WavesAmplitudeAnimationDurationInMillis = 3000
+private const val WavesShiftAnimationDurationInMillis = 2200
+private const val WavesAmplitudeAnimationDurationInMillis = 2500

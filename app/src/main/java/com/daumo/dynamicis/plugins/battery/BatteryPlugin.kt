@@ -92,6 +92,25 @@ class BatteryPlugin(
 	}
 
 	@Composable
+	override fun BackgroundComposable() {
+		val batteryFraction = (batteryPercent.toFloat() / 100f).coerceIn(0.15f, 1f)
+		val animatedProgress by animateFloatAsState(
+			targetValue = batteryFraction,
+			animationSpec = tween(durationMillis = 600, easing = FastOutSlowInEasing),
+			label = "battery_bg_progress"
+		)
+		val batteryColor = pointBetweenColors(BatteryEmpty, BatteryFull, (batteryPercent.toFloat() / 100f).coerceIn(0f, 1f))
+
+		WavesLoadingIndicator(
+			modifier = Modifier
+				.fillMaxSize()
+				.alpha(0.55f),
+			color = batteryColor,
+			progress = animatedProgress
+		)
+	}
+
+	@Composable
 	override fun Composable() {
 		BatteryView(batteryPercent)
 	}
@@ -101,107 +120,71 @@ class BatteryPlugin(
 		batteryPercent: Int
 	) {
 		val batteryFraction = (batteryPercent.toFloat() / 100f).coerceIn(0f, 1f)
-		val animatedProgress by animateFloatAsState(
-			targetValue = batteryFraction,
-			animationSpec = tween(durationMillis = 600, easing = FastOutSlowInEasing),
-			label = "battery_progress"
-		)
 		val batteryColor = pointBetweenColors(BatteryEmpty, BatteryFull, batteryFraction)
 
-		Box(
-			modifier = Modifier.fillMaxSize(),
-			contentAlignment = Alignment.Center
+		Row(
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(horizontal = 20.dp, vertical = 12.dp),
+			verticalAlignment = Alignment.CenterVertically,
+			horizontalArrangement = Arrangement.SpaceBetween
 		) {
-			// Waves animation in background
-			WavesLoadingIndicator(
-				modifier = Modifier
-					.fillMaxSize()
-					.alpha(0.5f),
-				color = batteryColor,
-				progress = animatedProgress
-			)
-
-			// Foreground battery information
 			Row(
-				modifier = Modifier
-					.fillMaxSize()
-					.padding(horizontal = 20.dp, vertical = 12.dp),
 				verticalAlignment = Alignment.CenterVertically,
-				horizontalArrangement = Arrangement.SpaceBetween
+				horizontalArrangement = Arrangement.spacedBy(12.dp)
 			) {
-				Row(
-					verticalAlignment = Alignment.CenterVertically,
-					horizontalArrangement = Arrangement.spacedBy(12.dp)
+				Box(
+					modifier = Modifier
+						.size(44.dp)
+						.clip(CircleShape)
+						.background(batteryColor.copy(alpha = 0.25f)),
+					contentAlignment = Alignment.Center
 				) {
-					Box(
-						modifier = Modifier
-							.size(44.dp)
-							.clip(CircleShape)
-							.background(batteryColor.copy(alpha = 0.25f)),
-						contentAlignment = Alignment.Center
-					) {
-						Icon(
-							painter = painterResource(id = R.drawable.ic_charging_full),
-							contentDescription = null,
-							tint = batteryColor,
-							modifier = Modifier.size(26.dp)
-						)
-					}
-					Column(
-						verticalArrangement = Arrangement.Center
-					) {
-						Text(
-							text = if (batteryPercent >= 100) "Fully Charged" else "Charging",
-							style = MaterialTheme.typography.titleMedium,
-							color = MaterialTheme.colorScheme.onSurface
-						)
-						Text(
-							text = if (batteryPercent >= 100) "Unplug charger" else "Battery level",
-							style = MaterialTheme.typography.bodySmall,
-							color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-						)
-					}
+					Icon(
+						painter = painterResource(id = R.drawable.ic_charging_full),
+						contentDescription = null,
+						tint = batteryColor,
+						modifier = Modifier.size(26.dp)
+					)
 				}
-
-				Text(
-					text = "$batteryPercent%",
-					style = MaterialTheme.typography.headlineMedium,
-					color = MaterialTheme.colorScheme.onSurface
-				)
+				Column(
+					verticalArrangement = Arrangement.Center
+				) {
+					Text(
+						text = if (batteryPercent >= 100) "Fully Charged" else "Charging",
+						style = MaterialTheme.typography.titleMedium,
+						color = MaterialTheme.colorScheme.onSurface
+					)
+					Text(
+						text = if (batteryPercent >= 100) "Unplug charger" else "Battery level",
+						style = MaterialTheme.typography.bodySmall,
+						color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+					)
+				}
 			}
+
+			Text(
+				text = "$batteryPercent%",
+				style = MaterialTheme.typography.headlineMedium,
+				color = MaterialTheme.colorScheme.onSurface
+			)
 		}
 	}
 
 	@Composable
 	override fun LeftOpenedComposable() {
 		val batteryFraction = (batteryPercent.toFloat() / 100f).coerceIn(0f, 1f)
-		val animatedProgress by animateFloatAsState(
-			targetValue = batteryFraction,
-			animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
-			label = "battery_left_progress"
-		)
 		val batteryColor = pointBetweenColors(BatteryEmpty, BatteryFull, batteryFraction)
 
-		Box(
+		Icon(
+			painter = painterResource(id = R.drawable.ic_charging_full),
+			contentDescription = "Battery level: $batteryPercent%",
+			tint = batteryColor,
 			modifier = Modifier
 				.fillMaxHeight()
-				.aspectRatio(1f)
-				.clip(CircleShape)
-				.background(batteryColor.copy(alpha = 0.2f)),
-			contentAlignment = Alignment.Center
-		) {
-			WavesLoadingIndicator(
-				modifier = Modifier.fillMaxSize(),
-				color = batteryColor,
-				progress = animatedProgress
-			)
-			Icon(
-				painter = painterResource(id = R.drawable.ic_charging_full),
-				contentDescription = "Battery level: $batteryPercent%",
-				tint = MaterialTheme.colorScheme.onSurface,
-				modifier = Modifier.fillMaxSize(0.65f)
-			)
-		}
+				.padding(start = 8.dp)
+				.size(20.dp)
+		)
 	}
 
 	override fun onClick() {
@@ -226,8 +209,9 @@ class BatteryPlugin(
 		if (showPercentage) {
 			Text(
 				text = "$batteryPercent%",
-				modifier = Modifier.padding(end = 4.dp),
-				style = MaterialTheme.typography.labelLarge
+				modifier = Modifier.padding(end = 8.dp),
+				style = MaterialTheme.typography.labelLarge,
+				color = MaterialTheme.colorScheme.onSurface
 			)
 		}
 	}

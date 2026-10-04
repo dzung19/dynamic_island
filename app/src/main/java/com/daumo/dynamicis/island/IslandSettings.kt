@@ -27,7 +27,6 @@ class IslandSettings {
 
 	var showOnLockScreen by mutableStateOf(false)
 	var showInLandscape by mutableStateOf(false)
-	var showBorders by mutableStateOf(false)
 
 	var autoHideOpenedAfter by mutableFloatStateOf(5000f)
 
@@ -43,7 +42,6 @@ class IslandSettings {
                 .putBoolean(SHOW_ON_LOCK_SCREEN, showOnLockScreen)
                 .putBoolean(SHOW_IN_LANDSCAPE, showInLandscape)
                 .putFloat(AUTO_HIDE_OPENED_AFTER, autoHideOpenedAfter)
-                .putBoolean(SHOW_BORDER, showBorders)
                 .putString(GRAVITY, gravity.name)
         }
 	}
@@ -60,7 +58,6 @@ class IslandSettings {
 		showOnLockScreen = settings.getBoolean(SHOW_ON_LOCK_SCREEN, false)
 		showInLandscape = settings.getBoolean(SHOW_IN_LANDSCAPE, false)
 		autoHideOpenedAfter = settings.getFloat(AUTO_HIDE_OPENED_AFTER, 5000f)
-		showBorders = settings.getBoolean(SHOW_BORDER, false)
 		gravity = IslandGravity.valueOf(settings.getString(GRAVITY, IslandGravity.Center.name) ?: IslandGravity.Center.name)
 	}
 }

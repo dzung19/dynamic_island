@@ -23,7 +23,6 @@ import androidx.compose.ui.unit.dp
 import com.daumo.dynamicis.model.SETTINGS_KEY
 import com.daumo.dynamicis.model.STYLE
 import com.daumo.dynamicis.model.THEME
-import com.daumo.dynamicis.island.IslandSettings
 import com.daumo.dynamicis.ui.settings.SettingsDivider
 import com.daumo.dynamicis.ui.settings.radioOptions
 import com.daumo.dynamicis.ui.theme.Theme
@@ -51,14 +50,6 @@ fun ThemeSettingsScreen() {
 			.padding(16.dp),
 		horizontalAlignment = Alignment.CenterHorizontally,
 	) {
-		SwitchSettingsItem(
-			title = "Show borders",
-			description = "Show borders around the island",
-			checked = IslandSettings.Companion.instance.showBorders
-		) {
-			IslandSettings.Companion.instance.showBorders = it
-			IslandSettings.Companion.instance.applySettings(context)
-		}
 		OutlinedCard(
 			modifier = Modifier
 				.fillMaxWidth()

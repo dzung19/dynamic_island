@@ -32,7 +32,6 @@ const val ENABLED_APPS = "enabled_apps"
 const val SHOW_ON_LOCK_SCREEN = "show_on_lock_screen"
 const val SHOW_IN_LANDSCAPE = "show_in_landscape"
 const val AUTO_HIDE_OPENED_AFTER = "auto_hide_opened_after"
-const val SHOW_BORDER = "show_border"
 const val GRAVITY = "gravity"
 
 // Battery Plugin Settings

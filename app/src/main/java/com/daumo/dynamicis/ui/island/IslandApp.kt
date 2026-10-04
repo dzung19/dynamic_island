@@ -8,8 +8,6 @@ import androidx.compose.animation.core.*
 import androidx.compose.animation.core.Spring.DampingRatioLowBouncy
 import androidx.compose.animation.core.Spring.DampingRatioMediumBouncy
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -73,7 +71,7 @@ fun IslandApp(
 			//.background(Color.Red)
 	) {
         DynamicIslandTheme(
-            darkTheme = if (islandOverlayService.invertedTheme) !Theme.Companion.instance.isDarkTheme else Theme.Companion.instance.isDarkTheme,
+            darkTheme = true,
             style = Theme.Companion.instance.themeStyle
         ) {
             Box(
@@ -105,33 +103,26 @@ fun IslandApp(
                         Modifier
                     }
 
-                val borderModifier =
-                    if (IslandSettings.Companion.instance.showBorders) {
-                        Modifier
-                            .border(
-                                width = 1.dp,
-                                color = MaterialTheme.colorScheme.primary,
-                                shape = RoundedCornerShape(cornerPercentage)
-                            )
-                    } else {
-                        Modifier
-                    }
-
                 Card(
                     shape = RoundedCornerShape(cornerPercentage),
                     modifier = Modifier
                         .then(clickModifier)
-                        .then(borderModifier)
                         .width(width)
                         .height(height)
                         /*.wrapContentHeight()
                     .height(IntrinsicSize.Min)*/
                         .defaultMinSize(minHeight = height),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
+                        containerColor = Color.Black,
                     )
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (islandOverlayService.islandState.state != IslandStates.Closed) {
+                            bindedPlugin?.BackgroundComposable()
+                        }
                         Crossfade(
                             targetState = islandOverlayService.islandState.state,
                             animationSpec = tween(100), label = ""

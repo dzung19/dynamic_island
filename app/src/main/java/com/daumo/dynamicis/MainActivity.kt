@@ -43,8 +43,6 @@ import com.daumo.dynamicis.navigation.navigateSingleTopTo
 import com.daumo.dynamicis.island.IslandSettings
 import com.daumo.dynamicis.model.DISCLOSURE_ACCEPTED
 import com.daumo.dynamicis.model.SETTINGS_KEY
-import com.daumo.dynamicis.model.SETTINGS_THEME_INVERTED
-import com.daumo.dynamicis.model.THEME_INVERTED
 import com.daumo.dynamicis.navigation.IslandDestination
 import com.daumo.dynamicis.navigation.IslandHome
 import com.daumo.dynamicis.navigation.IslandNavHost
@@ -78,10 +76,6 @@ class MainActivity : ComponentActivity() {
 		settingsPreferences = getSharedPreferences(SETTINGS_KEY, Context.MODE_PRIVATE)
 
 		WindowCompat.setDecorFitsSystemWindows(window, false)
-
-		// Invert theme in app
-		settingsPreferences.edit { putBoolean(THEME_INVERTED, true) }
-		sendBroadcast(Intent(SETTINGS_THEME_INVERTED).setPackage(packageName))
 
 		setContent {
 			// Setup plugins
@@ -198,33 +192,5 @@ class MainActivity : ComponentActivity() {
 				}
 			}
 		}
-	}
-
-	override fun onDestroy() {
-		super.onDestroy()
-		// Un-invert theme in app
-		settingsPreferences.edit { putBoolean(THEME_INVERTED, false) }
-		sendBroadcast(Intent(SETTINGS_THEME_INVERTED).setPackage(packageName))
-	}
-
-	override fun onStop() {
-		super.onStop()
-		// Un-invert theme in app
-		settingsPreferences.edit { putBoolean(THEME_INVERTED, false) }
-		sendBroadcast(Intent(SETTINGS_THEME_INVERTED).setPackage(packageName))
-	}
-
-	override fun onPause() {
-		super.onPause()
-		// Un-invert theme in app
-		settingsPreferences.edit { putBoolean(THEME_INVERTED, false) }
-		sendBroadcast(Intent(SETTINGS_THEME_INVERTED).setPackage(packageName))
-	}
-
-	override fun onResume() {
-		super.onResume()
-		// Invert theme in app
-		settingsPreferences.edit { putBoolean(THEME_INVERTED, true) }
-		sendBroadcast(Intent(SETTINGS_THEME_INVERTED).setPackage(packageName))
 	}
 }

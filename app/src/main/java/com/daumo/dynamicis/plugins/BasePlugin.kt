@@ -34,6 +34,8 @@ abstract class BasePlugin {
 	abstract fun LeftOpenedComposable()
 	@Composable
 	abstract fun RightOpenedComposable()
+	@Composable
+	open fun BackgroundComposable() {}
 
 	abstract fun onRightSwipe()
 	abstract fun onLeftSwipe()
